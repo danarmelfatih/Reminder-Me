@@ -1,0 +1,88 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Administrasi</p>
+    <h1>Admin dashboard</h1>
+    <p class="page-subtitle">Statistik operasional tanpa mengakses isi data pribadi pengguna.</p>
+  </div>
+  <a class="btn btn-ghost" href="/admin/users">
+    <svg class="icon"><use href="#icon-users"></use></svg>
+    Kelola pengguna
+  </a>
+</div>
+
+<section class="stat-grid">
+  <article class="stat-card">
+    <span class="stat-icon"><svg class="icon"><use href="#icon-users"></use></svg></span>
+    <div>
+      <p class="stat-label">Total pengguna</p>
+      <p class="stat-value" data-admin-stat="totalUsers">—</p>
+      <p class="stat-note" data-admin-note="newUsers">—</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-green"><svg class="icon"><use href="#icon-check"></use></svg></span>
+    <div>
+      <p class="stat-label">Pengguna aktif</p>
+      <p class="stat-value" data-admin-stat="activeUsers">—</p>
+      <p class="stat-note">Dapat masuk ke aplikasi</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-amber"><svg class="icon"><use href="#icon-alert"></use></svg></span>
+    <div>
+      <p class="stat-label">Dinonaktifkan</p>
+      <p class="stat-value" data-admin-stat="disabledUsers">—</p>
+      <p class="stat-note">Data tetap tersimpan</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-violet"><svg class="icon"><use href="#icon-hard-drive"></use></svg></span>
+    <div>
+      <p class="stat-label">Storage terpakai</p>
+      <p class="stat-value" data-admin-stat="totalStorage">—</p>
+      <p class="stat-note">Seluruh pengguna</p>
+    </div>
+  </article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Aktivitas sistem</h2>
+        <p>Status layanan inti.</p>
+      </div>
+    </div>
+    <div class="system-list" data-system-status>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Ringkasan data</h2>
+        <p>Agregat tanpa isi pribadi.</p>
+      </div>
+    </div>
+    <div class="admin-summary" data-admin-summary>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Email outbox</h2>
+      <p>Status pengiriman email 24 jam terakhir.</p>
+    </div>
+  </div>
+  <div class="email-stats" data-email-stats>
+    <div class="skeleton skeleton-row"></div>
+  </div>
+</section>

@@ -1,0 +1,84 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="text-link" href="/admin/users">Kelola pengguna</a> / Detail</p>
+    <h1 data-admin-user-name>Memuat pengguna…</h1>
+    <p class="page-subtitle" data-admin-user-email>—</p>
+  </div>
+  <span class="status-badge" data-admin-user-status>—</span>
+</div>
+
+<div class="admin-user-app" id="admin-user-app" data-user-id="<%= userId %>">
+  <div class="dashboard-grid">
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Informasi akun</h2>
+          <p>Data akun, bukan isi item pribadi.</p>
+        </div>
+      </div>
+      <dl class="detail-list" data-admin-user-info>
+        <div class="skeleton skeleton-row"></div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Kapasitas & batas</h2>
+          <p>Perubahan berlaku langsung.</p>
+        </div>
+      </div>
+      <form class="form-stack" data-admin-quota-form>
+        <div class="form-error" data-form-error hidden></div>
+        <div class="form-success" data-form-success hidden></div>
+        <div class="field">
+          <label for="admin-quota">Kuota storage (MB)</label>
+          <input id="admin-quota" type="number" name="storageQuotaMb" min="1" step="1" required>
+          <p class="field-hint" data-admin-quota-hint>—</p>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="admin-folder-limit">Batas folder</label>
+            <input id="admin-folder-limit" type="number" name="folderLimit" min="1" step="1" required>
+          </div>
+          <div class="field">
+            <label for="admin-tag-limit">Batas tag</label>
+            <input id="admin-tag-limit" type="number" name="tagLimit" min="1" step="1" required>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" data-submit>
+          <span data-submit-label>Simpan kapasitas</span>
+          <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Status akun</h2>
+        <p>Menonaktifkan akun akan mencabut seluruh sesi aktif. Data tetap tersimpan.</p>
+      </div>
+    </div>
+    <div class="admin-actions">
+      <button class="btn btn-ghost" type="button" data-admin-toggle-status>—</button>
+      <button class="btn btn-danger" type="button" data-admin-delete-user>
+        <svg class="icon"><use href="#icon-trash"></use></svg>
+        Hapus akun permanen
+      </button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Agregat penggunaan</h2>
+        <p>Tidak menampilkan judul, URL, catatan, atau file pengguna.</p>
+      </div>
+    </div>
+    <div class="admin-summary" data-admin-user-stats>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+</div>

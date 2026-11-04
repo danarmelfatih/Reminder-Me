@@ -1,0 +1,48 @@
+{
+  "name": "reminder-me",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal Information Organizer & Reminder",
+  "scripts": {
+    "dev": "bun run scripts/dev.js",
+    "dev:web": "bun --watch src/server.js",
+    "dev:worker": "bun --watch src/worker.js",
+    "start": "bun src/server.js",
+    "start:worker": "bun src/worker.js",
+    "db:migrate": "bun run src/db/migrate.js",
+    "db:seed": "bun run scripts/seed.js",
+    "admin:create": "bun run scripts/admin.js",
+    "storage:reconcile": "bun run scripts/reconcile.js",
+    "test": "bun test",
+    "lint": "biome check .",
+    "format": "biome check --write ."
+  },
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "cheerio": "^1.2.0",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-ejs-layouts": "^2.5.1",
+    "express-rate-limit": "^8.7.3",
+    "file-type": "^22.3.0",
+    "google-auth-library": "^11.3.3",
+    "helmet": "^8.3.0",
+    "iconv-lite": "^0.7.3",
+    "luxon": "^3.7.2",
+    "mime-types": "^3.0.2",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
+    "resend": "^6.37.0",
+    "rrule": "^2.8.1",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.4",
+    "pino-pretty": "^13.2.0"
+  }
+}

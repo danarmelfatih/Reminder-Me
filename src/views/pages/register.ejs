@@ -1,0 +1,40 @@
+<div class="auth-card">
+  <p class="eyebrow">Mulai dari yang penting</p>
+  <h2>Buat akun Anda</h2>
+  <p class="auth-lead">Ruang pribadi untuk menyimpan dan mengingat informasi.</p>
+
+  <form class="form-stack" data-auth-form="register" novalidate>
+    <div class="form-error" data-form-error hidden></div>
+    <div class="field">
+      <label for="register-name">Nama</label>
+      <input id="register-name" type="text" name="name" autocomplete="name" placeholder="Nama Anda" maxlength="120" required>
+    </div>
+    <div class="field">
+      <label for="register-email">Email</label>
+      <input id="register-email" type="email" name="email" autocomplete="email" placeholder="nama@email.com" required>
+    </div>
+    <div class="field">
+      <label for="register-password">Password</label>
+      <input id="register-password" type="password" name="password" autocomplete="new-password" placeholder="Minimal 8 karakter" minlength="8" required>
+      <p class="field-hint">Gunakan minimal 8 karakter. Password tidak disimpan di browser.</p>
+    </div>
+    <div class="field">
+      <label for="register-confirm">Konfirmasi password</label>
+      <input id="register-confirm" type="password" name="confirmPassword" autocomplete="new-password" placeholder="Ulangi password" minlength="8" required>
+    </div>
+    <button class="btn btn-primary btn-block" type="submit" data-submit>
+      <span data-submit-label>Buat akun</span>
+      <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+    </button>
+  </form>
+
+  <% if (googleEnabled) { %>
+  <div class="auth-divider"><span>atau</span></div>
+  <a class="btn btn-google btn-block" href="/api/auth/google?next=%2Fapp">
+    <svg class="icon"><use href="#icon-google"></use></svg>
+    Daftar dengan Google
+  </a>
+  <% } %>
+
+  <p class="auth-switch">Sudah punya akun? <a href="/login">Masuk</a></p>
+</div>

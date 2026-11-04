@@ -1,0 +1,68 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Kapasitas akun</p>
+    <h1>Storage</h1>
+    <p class="page-subtitle">File di Trash tetap menggunakan kapasitas sampai dihapus permanen.</p>
+  </div>
+  <a class="btn btn-primary" href="/app/items/new">
+    <svg class="icon"><use href="#icon-plus"></use></svg>
+    Tambah item
+  </a>
+</div>
+
+<div class="storage-layout">
+  <section class="panel storage-hero">
+    <div class="storage-hero-head">
+      <span class="stat-icon stat-icon-violet"><svg class="icon"><use href="#icon-hard-drive"></use></svg></span>
+      <div>
+        <h2>Penggunaan storage</h2>
+        <p data-storage-status>Menghitung…</p>
+      </div>
+    </div>
+    <div class="storage-meter-large">
+      <div class="storage-bar storage-bar-xl" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-storage-page-bar>
+        <span class="storage-bar-fill" data-storage-page-fill></span>
+      </div>
+      <div class="storage-meter-labels">
+        <span><strong data-storage-page-percent>—</strong> terpakai</span>
+        <span data-storage-page-numbers>—</span>
+      </div>
+    </div>
+    <div class="storage-breakdown">
+      <div class="breakdown-item">
+        <span class="breakdown-dot breakdown-dot-file"></span>
+        <div><p>File item</p><strong data-storage-file-size>—</strong></div>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-dot breakdown-dot-trash"></span>
+        <div><p>File di Trash</p><strong data-storage-trash-size>—</strong></div>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-dot breakdown-dot-free"></span>
+        <div><p>Tersisa</p><strong data-storage-free-size>—</strong></div>
+      </div>
+    </div>
+    <div class="notice" data-storage-warning hidden>
+      <svg class="icon"><use href="#icon-alert"></use></svg>
+      <span data-storage-warning-text></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Cara menghemat ruang</h2>
+        <p>Beberapa langkah sederhana.</p>
+      </div>
+    </div>
+    <ul class="tip-list">
+      <li><span class="tip-number">1</span><div><strong>Kosongkan Trash</strong><p>Item di Trash masih memakai storage. Hapus permanen jika sudah tidak diperlukan.</p></div></li>
+      <li><span class="tip-number">2</span><div><strong>Hapus file besar</strong><p>Gunakan filter jenis Dokumen atau Gambar untuk menemukan file berukuran besar.</p></div></li>
+      <li><span class="tip-number">3</span><div><strong>Arsipkan, jangan hapus</strong><p>Arsip tidak menghapus file dan tidak membebaskan storage, tetapi merapikan daftar utama.</p></div></li>
+    </ul>
+    <div class="storage-actions">
+      <a class="btn btn-ghost btn-sm" href="/app/trash">Buka Trash</a>
+      <a class="btn btn-ghost btn-sm" href="/app/items?type=document">Lihat dokumen</a>
+    </div>
+  </section>
+</div>

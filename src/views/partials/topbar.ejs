@@ -1,0 +1,28 @@
+<header class="topbar">
+  <button class="icon-btn topbar-menu" type="button" data-sidebar-open aria-label="Buka menu">
+    <svg class="icon"><use href="#icon-menu"></use></svg>
+  </button>
+
+  <form class="topbar-search" action="/app/items" method="get" role="search">
+    <svg class="icon search-icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+    <input type="search" name="q" placeholder="Cari judul, catatan, nama file…" aria-label="Cari item" autocomplete="off">
+    <kbd class="search-kbd" aria-hidden="true">/</kbd>
+  </form>
+
+  <div class="topbar-actions">
+    <a class="icon-btn topbar-add" href="/app/items/new" aria-label="Tambah item">
+      <svg class="icon"><use href="#icon-plus"></use></svg>
+    </a>
+    <a class="icon-btn notification-btn" href="/app/notifications" aria-label="Notifikasi">
+      <svg class="icon"><use href="#icon-bell"></use></svg>
+      <span class="notification-dot" data-notification-badge hidden></span>
+    </a>
+    <a class="topbar-user" href="/app/settings" aria-label="Pengaturan akun">
+      <% if (user && user.avatarUrl) { %>
+        <img class="avatar avatar-xs" src="<%= user.avatarUrl %>" alt="">
+      <% } else { %>
+        <span class="avatar avatar-xs avatar-fallback"><%= helpers.initials(user ? user.name : '?') %></span>
+      <% } %>
+    </a>
+  </div>
+</header>

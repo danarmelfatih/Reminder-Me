@@ -1,0 +1,43 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Organisasi</p>
+    <h1>Tag</h1>
+    <p class="page-subtitle">Satu item dapat memiliki beberapa tag. Menghapus tag tidak menghapus item.</p>
+  </div>
+  <span class="limit-pill" data-tag-limit>— / 100 tag</span>
+</div>
+
+<div class="manage-layout">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Buat tag baru</h2>
+        <p>Nama tag harus unik dalam akun Anda.</p>
+      </div>
+    </div>
+    <form class="inline-create-form" data-create-tag>
+      <div class="form-error" data-form-error hidden></div>
+      <div class="field">
+        <label for="tag-name">Nama tag</label>
+        <input id="tag-name" type="text" name="name" maxlength="40" placeholder="Contoh: penting" required>
+      </div>
+      <button class="btn btn-primary" type="submit" data-submit>
+        <svg class="icon"><use href="#icon-plus"></use></svg>
+        Buat tag
+      </button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Tag Anda</h2>
+        <p data-tag-count>Memuat…</p>
+      </div>
+    </div>
+    <div class="manage-list" data-tag-list>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+</div>

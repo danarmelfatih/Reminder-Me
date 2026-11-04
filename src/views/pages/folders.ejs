@@ -1,0 +1,43 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Organisasi</p>
+    <h1>Folder</h1>
+    <p class="page-subtitle">Kelompokkan item dalam satu tingkat folder. Penghapusan folder tidak menghapus item.</p>
+  </div>
+  <span class="limit-pill" data-folder-limit>— / 50 folder</span>
+</div>
+
+<div class="manage-layout">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Buat folder baru</h2>
+        <p>Nama folder harus unik dalam akun Anda.</p>
+      </div>
+    </div>
+    <form class="inline-create-form" data-create-folder>
+      <div class="form-error" data-form-error hidden></div>
+      <div class="field">
+        <label for="folder-name">Nama folder</label>
+        <input id="folder-name" type="text" name="name" maxlength="60" placeholder="Contoh: Referensi kerja" required>
+      </div>
+      <button class="btn btn-primary" type="submit" data-submit>
+        <svg class="icon"><use href="#icon-plus"></use></svg>
+        Buat folder
+      </button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Folder Anda</h2>
+        <p data-folder-count>Memuat…</p>
+      </div>
+    </div>
+    <div class="manage-list" data-folder-list>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+</div>

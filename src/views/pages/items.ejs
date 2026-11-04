@@ -1,0 +1,111 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow" data-items-eyebrow>Perpustakaan pribadi</p>
+    <h1 data-items-heading><%= heading %></h1>
+    <p class="page-subtitle" data-items-subtitle><%= subtitle %></p>
+  </div>
+  <% if (showNewButton) { %>
+  <a class="btn btn-primary" href="/app/items/new">
+    <svg class="icon"><use href="#icon-plus"></use></svg>
+    Tambah item
+  </a>
+  <% } %>
+</div>
+
+<div class="items-app" id="items-app" data-view="<%= viewMode %>" data-folder-id="<%= folderId || '' %>" data-tag-id="<%= tagId || '' %>" data-empty-title="<%= emptyTitle %>" data-empty-text="<%= emptyText %>">
+  <div class="list-toolbar">
+    <form class="list-search" data-list-search>
+      <svg class="icon"><use href="#icon-search"></use></svg>
+      <input type="search" name="q" placeholder="Cari dalam daftar ini…" autocomplete="off" aria-label="Cari item">
+    </form>
+    <div class="toolbar-actions">
+      <button class="btn btn-ghost btn-sm" type="button" data-toggle-filters>
+        <svg class="icon"><use href="#icon-filter"></use></svg>
+        Filter
+        <span class="filter-count" data-filter-count hidden></span>
+      </button>
+      <label class="select-inline">
+        <span class="sr-only">Urutkan</span>
+        <select data-sort-select>
+          <option value="newest">Terbaru disimpan</option>
+          <option value="priority">Prioritas tertinggi</option>
+          <option value="updated">Terakhir diperbarui</option>
+          <option value="oldest">Terlama disimpan</option>
+          <option value="name">Nama A–Z</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="filter-panel" data-filter-panel hidden>
+    <div class="filter-grid">
+      <div class="field">
+        <label for="filter-type">Jenis</label>
+        <select id="filter-type" data-filter="type">
+          <option value="">Semua jenis</option>
+          <option value="link">Link</option>
+          <option value="text">Catatan</option>
+          <option value="image">Gambar</option>
+          <option value="document">Dokumen</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-priority">Prioritas</label>
+        <select id="filter-priority" data-filter="priority">
+          <option value="">Semua prioritas</option>
+          <option value="high">Tinggi</option>
+          <option value="medium">Sedang</option>
+          <option value="low">Rendah</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-folder">Folder</label>
+        <select id="filter-folder" data-filter="folderId">
+          <option value="">Semua folder</option>
+          <option value="none">Tanpa folder</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-tag">Tag</label>
+        <select id="filter-tag" data-filter="tagId">
+          <option value="">Semua tag</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-reminder">Pengingat</label>
+        <select id="filter-reminder" data-filter="reminder">
+          <option value="">Semua</option>
+          <option value="active">Aktif</option>
+          <option value="none">Tanpa pengingat aktif</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-date-from">Disimpan dari</label>
+        <input id="filter-date-from" type="date" data-filter="dateFrom">
+      </div>
+      <div class="field">
+        <label for="filter-date-to">Sampai</label>
+        <input id="filter-date-to" type="date" data-filter="dateTo">
+      </div>
+      <div class="field filter-reset-field">
+        <button class="btn btn-ghost btn-sm" type="button" data-reset-filters>
+          <svg class="icon"><use href="#icon-rotate"></use></svg>
+          Reset filter
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-summary">
+    <span data-result-summary>Memuat item…</span>
+    <span class="view-note" data-view-note></span>
+  </div>
+
+  <div class="item-grid" data-item-grid aria-live="polite">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+  </div>
+
+  <nav class="pagination" data-pagination hidden aria-label="Halaman item"></nav>
+</div>

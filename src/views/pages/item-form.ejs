@@ -1,0 +1,148 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow"><a class="text-link" href="/app/items">Semua item</a> / <span data-form-mode-label><%= mode === 'edit' ? 'Edit' : 'Baru' %></span></p>
+    <h1 data-form-heading><%= mode === 'edit' ? 'Edit item' : 'Tambah item' %></h1>
+    <p class="page-subtitle">Simpan informasi penting. Pengingat bersifat opsional.</p>
+  </div>
+</div>
+
+<div class="item-form-app" id="item-form-app" data-mode="<%= mode %>" data-item-id="<%= itemId || '' %>" data-initial-type="<%= initialType %>">
+  <form class="item-form" data-item-form novalidate>
+    <div class="form-error" data-form-error hidden></div>
+
+    <% if (mode === 'create') { %>
+    <section class="form-section">
+      <div class="form-section-head">
+        <h2>Jenis informasi</h2>
+        <p>Pilih jenis konten yang ingin disimpan.</p>
+      </div>
+      <div class="type-picker" role="radiogroup" aria-label="Jenis informasi">
+        <button type="button" class="type-option" data-type-option="link" role="radio" aria-checked="false">
+          <span class="type-option-icon"><svg class="icon"><use href="#icon-link"></use></svg></span>
+          <span><strong>Link</strong><small>URL website dan referensi</small></span>
+        </button>
+        <button type="button" class="type-option" data-type-option="text" role="radio" aria-checked="false">
+          <span class="type-option-icon"><svg class="icon"><use href="#icon-note"></use></svg></span>
+          <span><strong>Catatan</strong><small>Teks dan informasi pribadi</small></span>
+        </button>
+        <button type="button" class="type-option" data-type-option="image" role="radio" aria-checked="false">
+          <span class="type-option-icon"><svg class="icon"><use href="#icon-image"></use></svg></span>
+          <span><strong>Gambar</strong><small>JPG, PNG, WEBP hingga 10 MB</small></span>
+        </button>
+        <button type="button" class="type-option" data-type-option="document" role="radio" aria-checked="false">
+          <span class="type-option-icon"><svg class="icon"><use href="#icon-file-text"></use></svg></span>
+          <span><strong>Dokumen</strong><small>PDF, Office, TXT hingga 25 MB</small></span>
+        </button>
+      </div>
+    </section>
+    <% } else { %>
+    <section class="form-section">
+      <div class="form-section-head">
+        <h2>Jenis informasi</h2>
+        <p data-edit-type-label>Memuat…</p>
+      </div>
+      <div class="edit-file-preview" data-existing-file hidden></div>
+    </section>
+    <% } %>
+
+    <section class="form-section">
+      <div class="form-section-head">
+        <h2>Informasi utama</h2>
+        <p>Judul wajib diisi. Deskripsi dapat digunakan untuk catatan tambahan.</p>
+      </div>
+      <div class="field">
+        <label for="item-title">Judul <span class="required-mark">*</span></label>
+        <input id="item-title" type="text" name="title" maxlength="200" placeholder="Judul yang mudah dikenali" required>
+      </div>
+
+      <div class="field" data-url-field>
+        <label for="item-url">URL <span class="required-mark">*</span></label>
+        <div class="input-with-icon">
+          <svg class="icon"><use href="#icon-link"></use></svg>
+          <input id="item-url" type="url" name="url" placeholder="https://contoh.com/artikel" autocomplete="url">
+        </div>
+        <p class="field-hint" data-metadata-status>Metadata link akan diambil otomatis saat URL diisi.</p>
+        <div class="metadata-preview" data-metadata-preview hidden></div>
+      </div>
+
+      <div class="field" data-file-field>
+        <label for="item-file">File <span class="required-mark">*</span></label>
+        <label class="dropzone" data-dropzone>
+          <input id="item-file" type="file" name="file" data-file-input hidden>
+          <span class="dropzone-icon"><svg class="icon"><use href="#icon-upload"></use></svg></span>
+          <span class="dropzone-copy">
+            <strong data-dropzone-title>Pilih file atau tarik ke sini</strong>
+            <small data-dropzone-hint>Maksimal 10 MB untuk gambar, 25 MB untuk dokumen.</small>
+          </span>
+        </label>
+        <p class="field-hint" data-file-error hidden></p>
+      </div>
+
+      <div class="field">
+        <label for="item-description">Deskripsi / catatan</label>
+        <textarea id="item-description" name="description" rows="5" maxlength="100000" placeholder="Tambahkan konteks agar mudah ditemukan kembali…"></textarea>
+        <div class="field-counter"><span data-description-count>0</span> karakter</div>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="form-section-head">
+        <h2>Organisasi</h2>
+        <p>Kelompokkan item dengan folder dan tag.</p>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="item-folder">Folder</label>
+          <select id="item-folder" name="folderId" data-folder-select>
+            <option value="">Tanpa folder</option>
+          </select>
+          <p class="field-hint"><a class="text-link" href="/app/folders">Kelola folder</a></p>
+        </div>
+        <div class="field">
+          <label>Prioritas</label>
+          <div class="segmented" data-priority-picker>
+            <label><input type="radio" name="priority" value="high"><span>High</span></label>
+            <label><input type="radio" name="priority" value="medium" checked><span>Medium</span></label>
+            <label><input type="radio" name="priority" value="low"><span>Low</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label-row">
+          <label>Tag</label>
+          <a class="text-link" href="/app/tags">Kelola tag</a>
+        </div>
+        <div class="tag-picker" data-tag-picker>
+          <p class="tag-picker-loading">Memuat tag…</p>
+        </div>
+      </div>
+      <label class="checkbox-row">
+        <input type="checkbox" name="isFavorite" value="1">
+        <span>Tandai sebagai favorit</span>
+      </label>
+    </section>
+
+    <section class="form-section reminder-form-section">
+      <div class="form-section-head">
+        <h2>Pengingat</h2>
+        <p>Opsional. Anda dapat mengaturnya sekarang atau setelah item tersimpan.</p>
+      </div>
+      <div class="reminder-form-placeholder" data-reminder-placeholder>
+        <span class="reminder-form-icon"><svg class="icon"><use href="#icon-bell"></use></svg></span>
+        <div>
+          <strong data-reminder-placeholder-title>Atur pengingat setelah item tersimpan</strong>
+          <p data-reminder-placeholder-text>Buka detail item untuk menentukan tanggal, waktu, dan pola pengulangan.</p>
+        </div>
+        <a class="btn btn-ghost btn-sm" href="/app/items" data-reminder-placeholder-link>Lihat item</a>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <a class="btn btn-ghost" href="/app/items" data-cancel-link>Batal</a>
+      <button class="btn btn-primary" type="submit" data-submit>
+        <span data-submit-label><%= mode === 'edit' ? 'Simpan perubahan' : 'Simpan item' %></span>
+        <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,49 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Administrasi</p>
+    <h1>Kelola pengguna</h1>
+    <p class="page-subtitle">Kelola status akun dan kapasitas tanpa membaca isi data pribadi.</p>
+  </div>
+  <a class="btn btn-ghost" href="/admin">
+    <svg class="icon"><use href="#icon-chart"></use></svg>
+    Kembali ke statistik
+  </a>
+</div>
+
+<div class="panel">
+  <div class="admin-toolbar">
+    <form class="list-search" data-admin-user-search>
+      <svg class="icon"><use href="#icon-search"></use></svg>
+      <input type="search" name="q" placeholder="Cari nama atau email…" aria-label="Cari pengguna">
+    </form>
+    <label class="select-inline">
+      <span class="sr-only">Status</span>
+      <select data-admin-status-filter>
+        <option value="all">Semua status</option>
+        <option value="active">Aktif</option>
+        <option value="disabled">Dinonaktifkan</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Pengguna</th>
+          <th>Status</th>
+          <th>Terdaftar</th>
+          <th>Storage</th>
+          <th class="table-actions">Aksi</th>
+        </tr>
+      </thead>
+      <tbody data-admin-user-rows>
+        <tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-footer">
+    <span class="muted" data-admin-user-summary>Memuat…</span>
+    <nav class="pagination" data-admin-user-pagination hidden aria-label="Halaman pengguna"></nav>
+  </div>
+</div>

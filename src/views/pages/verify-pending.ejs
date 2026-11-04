@@ -1,0 +1,22 @@
+<div class="auth-card">
+  <div class="auth-icon-badge"><svg class="icon"><use href="#icon-mail"></use></svg></div>
+  <p class="eyebrow">Satu langkah lagi</p>
+  <h2>Verifikasi email Anda</h2>
+  <p class="auth-lead">Kami mengirim tautan verifikasi ke <strong><%= user.email %></strong>. Buka tautan tersebut untuk mengaktifkan akun.</p>
+
+  <div class="notice">
+    <svg class="icon"><use href="#icon-shield"></use></svg>
+    <span>Jika belum menerima email, periksa folder spam atau kirim ulang tautan di bawah.</span>
+  </div>
+
+  <form class="form-stack" data-auth-form="resend" novalidate>
+    <div class="form-error" data-form-error hidden></div>
+    <div class="form-success" data-form-success hidden></div>
+    <button class="btn btn-primary btn-block" type="submit" data-submit>
+      <span data-submit-label>Kirim ulang verifikasi</span>
+      <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+    </button>
+  </form>
+
+  <button class="btn btn-ghost btn-block" type="button" data-logout>Keluar dari akun</button>
+</div>

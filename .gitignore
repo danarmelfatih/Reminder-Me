@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.local
+storage/*
+!storage/.gitkeep
+storage/.gitkeep
+*.log
+.pgdata/
+coverage/
+.DS_Store

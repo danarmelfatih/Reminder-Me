@@ -1,0 +1,21 @@
+<div class="item-detail-app" id="item-detail-app" data-item-id="<%= itemId %>">
+  <div class="page-heading item-detail-heading">
+    <div>
+      <p class="eyebrow"><a class="text-link" href="/app/items">Semua item</a> / Detail</p>
+      <h1 data-detail-title>Memuat item…</h1>
+    </div>
+    <div class="detail-heading-actions" data-detail-actions hidden>
+      <a class="btn btn-ghost" href="#" data-detail-edit>
+        <svg class="icon"><use href="#icon-pencil"></use></svg>
+        Edit
+      </a>
+      <button class="icon-btn" type="button" data-detail-favorite aria-label="Tandai favorit">
+        <svg class="icon"><use href="#icon-star"></use></svg>
+      </button>
+    </div>
+  </div>
+
+  <div data-detail-content>
+    <div class="skeleton skeleton-detail"></div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<section class="error-page">
+  <p class="error-code"><%= status %></p>
+  <h1><%= title %></h1>
+  <p class="error-message"><%= message %></p>
+  <div class="error-actions">
+    <a class="btn btn-primary" href="<%= user ? '/app' : '/' %>"><%= user ? 'Kembali ke dashboard' : 'Kembali ke beranda' %></a>
+    <% if (user) { %>
+      <a class="btn btn-ghost" href="/app/items">Buka semua item</a>
+    <% } else { %>
+      <a class="btn btn-ghost" href="/login">Masuk</a>
+    <% } %>
+  </div>
+</section>

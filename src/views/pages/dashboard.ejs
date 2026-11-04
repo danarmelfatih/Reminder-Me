@@ -1,0 +1,96 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow" data-greeting>Ruang informasi Anda</p>
+    <h1>Dashboard</h1>
+    <p class="page-subtitle">Ringkasan item, pengingat, dan kapasitas penyimpanan Anda.</p>
+  </div>
+  <a class="btn btn-primary" href="/app/items/new">
+    <svg class="icon"><use href="#icon-plus"></use></svg>
+    Tambah item
+  </a>
+</div>
+
+<section class="stat-grid" aria-label="Ringkasan">
+  <article class="stat-card">
+    <span class="stat-icon"><svg class="icon"><use href="#icon-inbox"></use></svg></span>
+    <div>
+      <p class="stat-label">Item aktif</p>
+      <p class="stat-value" data-stat="active_items">—</p>
+      <p class="stat-note" data-stat-note="active_items">Di luar arsip dan Trash</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-amber"><svg class="icon"><use href="#icon-bell"></use></svg></span>
+    <div>
+      <p class="stat-label">Pengingat aktif</p>
+      <p class="stat-value" data-stat="activeReminders">—</p>
+      <p class="stat-note">Akan dikirim otomatis</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-blue"><svg class="icon"><use href="#icon-folder"></use></svg></span>
+    <div>
+      <p class="stat-label">Folder</p>
+      <p class="stat-value" data-stat="folders">—</p>
+      <p class="stat-note">Satu tingkat, tanpa subfolder</p>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-icon stat-icon-violet"><svg class="icon"><use href="#icon-hard-drive"></use></svg></span>
+    <div>
+      <p class="stat-label">Storage terpakai</p>
+      <p class="stat-value" data-stat="storage">—</p>
+      <p class="stat-note" data-stat-note="storage">dari kuota Anda</p>
+    </div>
+  </article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Pengingat mendatang</h2>
+        <p>Tujuh hari ke depan</p>
+      </div>
+      <a class="text-link" href="/app/items?reminder=active">Lihat semua</a>
+    </div>
+    <div class="compact-list" data-upcoming-reminders>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Item terbaru</h2>
+        <p>Baru saja Anda simpan</p>
+      </div>
+      <a class="text-link" href="/app/items">Semua item</a>
+    </div>
+    <div class="compact-list" data-recent-items>
+      <div class="skeleton skeleton-row"></div>
+      <div class="skeleton skeleton-row"></div>
+    </div>
+  </section>
+</div>
+
+<section class="panel storage-panel">
+  <div class="storage-panel-copy">
+    <span class="stat-icon stat-icon-violet"><svg class="icon"><use href="#icon-hard-drive"></use></svg></span>
+    <div>
+      <h2>Kapasitas penyimpanan</h2>
+      <p data-storage-message>Menghitung penggunaan storage…</p>
+    </div>
+  </div>
+  <div class="storage-panel-meter">
+    <div class="storage-bar storage-bar-lg" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-dashboard-storage-bar>
+      <span class="storage-bar-fill" data-dashboard-storage-fill></span>
+    </div>
+    <div class="storage-panel-numbers">
+      <span><strong data-dashboard-storage-used>—</strong> terpakai</span>
+      <span><strong data-dashboard-storage-remaining>—</strong> tersisa</span>
+    </div>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="/app/storage">Kelola storage</a>
+</section>

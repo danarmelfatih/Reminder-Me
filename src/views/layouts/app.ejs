@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <meta name="theme-color" content="#1f6b5c">
+  <title><%= title %> · Reminder Me</title>
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="app-body <%= bodyClass %>" data-page="<%= pageId || '' %>" data-authed="true" data-user-id="<%= user ? user.id : '' %>">
+  <%- include('../partials/icon-sprite') %>
+  <a class="skip-link" href="#main-content">Lewati ke konten</a>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <div class="app-main">
+      <%- include('../partials/topbar') %>
+      <main class="page-content" id="main-content">
+        <%- include('../partials/flash') %>
+        <%- body %>
+      </main>
+    </div>
+  </div>
+  <div class="sidebar-backdrop" data-sidebar-backdrop hidden></div>
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+  <div id="modal-root"></div>
+  <script type="module" src="/js/app.js"></script>
+  <% if (pageScript) { %>
+  <script type="module" src="<%= pageScript %>"></script>
+  <% } %>
+</body>
+</html>

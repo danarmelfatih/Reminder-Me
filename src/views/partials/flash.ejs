@@ -1,0 +1,8 @@
+<% if (flash) { %>
+<div class="flash flash-<%= flash.type %>" data-flash-auto role="status">
+  <span class="flash-icon">
+    <svg class="icon"><use href="#icon-<%= flash.type === 'error' ? 'alert' : 'check' %>"></use></svg>
+  </span>
+  <span><%= flash.message %></span>
+</div>
+<% } %>

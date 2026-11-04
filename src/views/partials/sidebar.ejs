@@ -1,0 +1,102 @@
+<aside class="sidebar" id="sidebar" aria-label="Navigasi aplikasi">
+  <div class="sidebar-top">
+    <a class="brand" href="/app">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M8 5.5h16v22l-8-5.2-8 5.2v-22Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 12h8M12 16.5h5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </span>
+      <span class="brand-name">Reminder Me</span>
+    </a>
+    <button class="icon-btn sidebar-close" type="button" data-sidebar-close aria-label="Tutup menu">
+      <svg class="icon"><use href="#icon-x"></use></svg>
+    </button>
+  </div>
+
+  <a class="btn btn-primary sidebar-add" href="/app/items/new">
+    <svg class="icon"><use href="#icon-plus"></use></svg>
+    Tambah item
+  </a>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <a class="nav-item <%= currentPath === '/app' ? 'is-active' : '' %>" href="/app">
+        <svg class="icon"><use href="#icon-home"></use></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item <%= currentPath === '/app/items' || currentPath.startsWith('/app/items/') ? 'is-active' : '' %>" href="/app/items">
+        <svg class="icon"><use href="#icon-inbox"></use></svg>
+        <span>Semua item</span>
+        <span class="nav-count" data-nav-count="active" hidden></span>
+      </a>
+      <a class="nav-item <%= currentPath === '/app/favorites' ? 'is-active' : '' %>" href="/app/favorites">
+        <svg class="icon"><use href="#icon-star"></use></svg>
+        <span>Favorit</span>
+        <span class="nav-count" data-nav-count="favorites" hidden></span>
+      </a>
+      <a class="nav-item <%= currentPath === '/app/archive' ? 'is-active' : '' %>" href="/app/archive">
+        <svg class="icon"><use href="#icon-archive"></use></svg>
+        <span>Arsip</span>
+        <span class="nav-count" data-nav-count="archived" hidden></span>
+      </a>
+      <a class="nav-item <%= currentPath === '/app/trash' ? 'is-active' : '' %>" href="/app/trash">
+        <svg class="icon"><use href="#icon-trash"></use></svg>
+        <span>Trash</span>
+        <span class="nav-count" data-nav-count="trash" hidden></span>
+      </a>
+    </div>
+
+    <div class="nav-group">
+      <p class="nav-label">Organisasi</p>
+      <a class="nav-item <%= currentPath.startsWith('/app/folders') ? 'is-active' : '' %>" href="/app/folders">
+        <svg class="icon"><use href="#icon-folder"></use></svg>
+        <span>Folder</span>
+      </a>
+      <a class="nav-item <%= currentPath.startsWith('/app/tags') ? 'is-active' : '' %>" href="/app/tags">
+        <svg class="icon"><use href="#icon-tag"></use></svg>
+        <span>Tag</span>
+      </a>
+    </div>
+
+    <% if (user && user.role === 'admin') { %>
+    <div class="nav-group">
+      <p class="nav-label">Administrasi</p>
+      <a class="nav-item <%= currentPath.startsWith('/admin') ? 'is-active' : '' %>" href="/admin">
+        <svg class="icon"><use href="#icon-chart"></use></svg>
+        <span>Admin panel</span>
+      </a>
+    </div>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="storage-widget" data-storage-widget>
+      <div class="storage-widget-head">
+        <span><svg class="icon"><use href="#icon-hard-drive"></use></svg> Storage</span>
+        <a href="/app/storage">Kelola</a>
+      </div>
+      <div class="storage-bar" role="progressbar" aria-label="Penggunaan storage" aria-valuemin="0" aria-valuemax="100" data-storage-bar>
+        <span class="storage-bar-fill" data-storage-fill></span>
+      </div>
+      <p class="storage-widget-text">
+        <strong data-storage-used><%= helpers.formatBytes(user ? user.storageUsedBytes : 0) %></strong>
+        dari <span data-storage-quota><%= helpers.formatBytes(user ? user.storageQuotaBytes : 0) %></span>
+      </p>
+    </div>
+
+    <div class="sidebar-user">
+      <a class="user-chip" href="/app/settings" aria-label="Buka pengaturan akun">
+        <% if (user && user.avatarUrl) { %>
+          <img class="avatar avatar-sm" src="<%= user.avatarUrl %>" alt="">
+        <% } else { %>
+          <span class="avatar avatar-sm avatar-fallback"><%= helpers.initials(user ? user.name : '?') %></span>
+        <% } %>
+        <span class="user-chip-copy">
+          <strong><%= user ? user.name : '' %></strong>
+          <span><%= user ? user.email : '' %></span>
+        </span>
+      </a>
+      <button class="icon-btn" type="button" data-logout aria-label="Keluar">
+        <svg class="icon"><use href="#icon-log-out"></use></svg>
+      </button>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,147 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">Akun</p>
+    <h1>Pengaturan</h1>
+    <p class="page-subtitle">Kelola profil, keamanan, data, dan akun Anda.</p>
+  </div>
+</div>
+
+<div class="settings-layout">
+  <section class="panel settings-section">
+    <div class="panel-head">
+      <div>
+        <h2>Profil</h2>
+        <p>Nama dan foto profil yang tampil di aplikasi.</p>
+      </div>
+    </div>
+
+    <div class="profile-editor">
+      <form class="avatar-form" data-avatar-form>
+        <div class="avatar-preview">
+          <% if (user.avatarUrl) { %>
+            <img src="<%= user.avatarUrl %>" alt="Foto profil" data-avatar-image>
+          <% } else { %>
+            <span class="avatar avatar-xl avatar-fallback" data-avatar-image><%= helpers.initials(user.name) %></span>
+          <% } %>
+        </div>
+        <div class="avatar-form-copy">
+          <label class="btn btn-ghost btn-sm" for="avatar-input">
+            <svg class="icon"><use href="#icon-camera"></use></svg>
+            Ganti foto
+          </label>
+          <input id="avatar-input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp" data-avatar-input hidden>
+          <p class="field-hint">JPG, PNG, atau WEBP. Maksimal 2 MB.</p>
+        </div>
+      </form>
+
+      <form class="form-stack" data-profile-form>
+        <div class="form-error" data-form-error hidden></div>
+        <div class="form-success" data-form-success hidden></div>
+        <div class="field">
+          <label for="profile-name">Nama</label>
+          <input id="profile-name" type="text" name="name" maxlength="120" value="<%= user.name %>" required>
+        </div>
+        <div class="field">
+          <label for="profile-email">Email</label>
+          <input id="profile-email" type="email" value="<%= user.email %>" disabled>
+          <p class="field-hint">Email belum dapat diubah pada versi ini.</p>
+        </div>
+        <div class="field">
+          <label for="profile-timezone">Zona waktu</label>
+          <select id="profile-timezone" name="timezone" data-timezone-select>
+            <option value="<%= user.timezone %>"><%= user.timezone %></option>
+          </select>
+          <p class="field-hint">Digunakan untuk menampilkan waktu dan menghitung pengingat baru.</p>
+        </div>
+        <div class="account-meta">
+          <span>Terdaftar sejak <strong><%= helpers.formatDate(user.createdAt, user.timezone) %></strong></span>
+          <span class="status-badge status-badge-soft"><%= user.emailVerified ? 'Email terverifikasi' : 'Belum terverifikasi' %></span>
+        </div>
+        <div class="form-actions form-actions-left">
+          <button class="btn btn-primary" type="submit" data-submit>
+            <span data-submit-label>Simpan profil</span>
+            <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="panel-head">
+      <div>
+        <h2>Password</h2>
+        <p><%= user.hasPassword ? 'Ubah password akun Anda.' : 'Akun ini masuk dengan Google.' %></p>
+      </div>
+    </div>
+
+    <% if (!user.hasPassword) { %>
+      <div class="notice">
+        <svg class="icon"><use href="#icon-shield"></use></svg>
+        <span>Untuk mengatur password, verifikasi ulang dengan Google terlebih dahulu. Setelah itu Anda dapat masuk dengan email dan password.</span>
+      </div>
+      <% if (googleEnabled) { %>
+        <a class="btn btn-google" href="/api/auth/google?purpose=reauth&next=%2Fapp%2Fsettings">
+          <svg class="icon"><use href="#icon-google"></use></svg>
+          Verifikasi dengan Google
+        </a>
+      <% } %>
+    <% } %>
+
+    <form class="form-stack" data-password-form>
+      <div class="form-error" data-form-error hidden></div>
+      <div class="form-success" data-form-success hidden></div>
+      <% if (user.hasPassword) { %>
+      <div class="field">
+        <label for="current-password">Password saat ini</label>
+        <input id="current-password" type="password" name="currentPassword" autocomplete="current-password" required>
+      </div>
+      <% } %>
+      <div class="field">
+        <label for="new-password">Password baru</label>
+        <input id="new-password" type="password" name="newPassword" autocomplete="new-password" minlength="8" placeholder="Minimal 8 karakter" required>
+      </div>
+      <div class="field">
+        <label for="confirm-new-password">Konfirmasi password baru</label>
+        <input id="confirm-new-password" type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="form-actions form-actions-left">
+        <button class="btn btn-primary" type="submit" data-submit>
+          <span data-submit-label><%= user.hasPassword ? 'Ubah password' : 'Atur password' %></span>
+          <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel settings-section">
+    <div class="panel-head">
+      <div>
+        <h2>Data pribadi</h2>
+        <p>Unduh seluruh data Anda dalam format ZIP.</p>
+      </div>
+    </div>
+    <p class="settings-copy">Arsip berisi file asli, data terstruktur dalam JSON, folder, tag, pengingat, dan informasi profil. Item di Trash disertakan dengan penanda status.</p>
+    <div class="settings-actions">
+      <a class="btn btn-ghost" href="/api/export" data-export-button>
+        <svg class="icon"><use href="#icon-download"></use></svg>
+        Unduh data (ZIP)
+      </a>
+      <span class="muted">Proses dapat memakan waktu untuk data berukuran besar.</span>
+    </div>
+  </section>
+
+  <section class="panel settings-section danger-zone">
+    <div class="panel-head">
+      <div>
+        <h2>Hapus akun</h2>
+        <p>Tindakan ini permanen dan tidak dapat dipulihkan.</p>
+      </div>
+    </div>
+    <p class="settings-copy">Menghapus akun akan menghapus seluruh item, file, folder, tag, pengingat, notifikasi, dan sesi login. Tidak ada masa pemulihan.</p>
+    <button class="btn btn-danger" type="button" data-delete-account data-has-password="<%= user.hasPassword ? 'true' : 'false' %>" data-google-linked="<%= user.googleLinked ? 'true' : 'false' %>">
+      <svg class="icon"><use href="#icon-trash"></use></svg>
+      Hapus akun saya
+    </button>
+  </section>
+</div>

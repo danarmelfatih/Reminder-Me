@@ -1,0 +1,38 @@
+<div class="auth-card">
+  <p class="eyebrow">Selamat datang kembali</p>
+  <h2>Masuk ke akun Anda</h2>
+  <p class="auth-lead">Lanjutkan mengelola informasi penting Anda.</p>
+
+  <form class="form-stack" data-auth-form="login" novalidate>
+    <div class="form-error" data-form-error hidden></div>
+    <div class="field">
+      <label for="login-email">Email</label>
+      <input id="login-email" type="email" name="email" autocomplete="username" placeholder="nama@email.com" required>
+    </div>
+    <div class="field">
+      <div class="field-label-row">
+        <label for="login-password">Password</label>
+        <a class="text-link" href="/forgot-password">Lupa password?</a>
+      </div>
+      <input id="login-password" type="password" name="password" autocomplete="current-password" placeholder="Masukkan password" required>
+    </div>
+    <label class="checkbox-row">
+      <input type="checkbox" name="remember" value="1">
+      <span>Ingat saya selama 7 hari</span>
+    </label>
+    <button class="btn btn-primary btn-block" type="submit" data-submit>
+      <span data-submit-label>Masuk</span>
+      <span class="spinner" data-spinner hidden aria-hidden="true"></span>
+    </button>
+  </form>
+
+  <% if (googleEnabled) { %>
+  <div class="auth-divider"><span>atau</span></div>
+  <a class="btn btn-google btn-block" href="/api/auth/google?next=<%= encodeURIComponent(typeof next !== 'undefined' ? next : '/app') %>">
+    <svg class="icon"><use href="#icon-google"></use></svg>
+    Masuk dengan Google
+  </a>
+  <% } %>
+
+  <p class="auth-switch">Belum punya akun? <a href="/register">Buat akun</a></p>
+</div>
