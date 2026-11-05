@@ -40,7 +40,9 @@ export function verifyCsrf(req, res, next) {
   const header = req.get('x-csrf-token');
   const cookie = req.cookies?.[config.csrfCookieName];
   if (!header || !cookie || !timingSafeEqualString(header, cookie)) {
-    return next(new HttpError(403, 'Token keamanan tidak valid. Muat ulang halaman.', 'csrf_failed'));
+    return next(
+      new HttpError(403, 'Token keamanan tidak valid. Muat ulang halaman.', 'csrf_failed'),
+    );
   }
   next();
 }

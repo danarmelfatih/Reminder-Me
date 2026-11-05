@@ -1,12 +1,5 @@
 import { api, errorMessage } from './api.js';
-import {
-  append,
-  h,
-  icon,
-  renderPagination,
-  timeAgo,
-  toast,
-} from './ui.js';
+import { h, icon, renderPagination, timeAgo, toast } from './ui.js';
 
 const list = document.querySelector('[data-notification-list]');
 const pagination = document.querySelector('[data-notification-pagination]');
@@ -91,7 +84,11 @@ function render(data) {
 
 function renderNotification(notification) {
   const iconName =
-    notification.type === 'trash_warning' ? 'trash' : notification.type === 'system' ? 'alert' : 'bell';
+    notification.type === 'trash_warning'
+      ? 'trash'
+      : notification.type === 'system'
+        ? 'alert'
+        : 'bell';
   const item = h(
     'div',
     { class: `notification-item${notification.is_read ? '' : ' is-unread'}` },
@@ -108,11 +105,19 @@ function renderNotification(notification) {
   const actions = h('div', { class: 'notification-item-actions' });
   if (notification.item_id) {
     actions.append(
-      h('a', { class: 'btn btn-ghost btn-sm', href: `/app/items/${notification.item_id}`, text: 'Buka item' }),
+      h('a', {
+        class: 'btn btn-ghost btn-sm',
+        href: `/app/items/${notification.item_id}`,
+        text: 'Buka item',
+      }),
     );
   }
   if (!notification.is_read) {
-    const button = h('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Tandai dibaca' });
+    const button = h('button', {
+      class: 'btn btn-ghost btn-sm',
+      type: 'button',
+      text: 'Tandai dibaca',
+    });
     button.addEventListener('click', async () => {
       button.disabled = true;
       try {

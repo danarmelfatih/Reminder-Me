@@ -31,13 +31,11 @@ dashboardRouter.get('/', async (req, res) => {
       [userId],
     ),
     listItems(userId, { view: 'all', sort: 'newest' }, { page: 1, perPage: 5, offset: 0 }),
-    query('SELECT count(*)::int AS count FROM notifications WHERE user_id = $1 AND is_read = false', [
-      userId,
-    ]),
     query(
-      'SELECT count(*)::int AS count FROM folders WHERE user_id = $1',
+      'SELECT count(*)::int AS count FROM notifications WHERE user_id = $1 AND is_read = false',
       [userId],
     ),
+    query('SELECT count(*)::int AS count FROM folders WHERE user_id = $1', [userId]),
   ]);
 
   const reminderCount = await query(

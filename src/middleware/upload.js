@@ -11,7 +11,10 @@ function storage(maxBytes) {
       cb(null, config.tmpDir);
     },
     filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname).toLowerCase().replace(/[^a-z0-9.]/g, '');
+      const ext = path
+        .extname(file.originalname)
+        .toLowerCase()
+        .replace(/[^a-z0-9.]/g, '');
       cb(null, `${Date.now()}-${randomHex(12)}${ext}`);
     },
   });

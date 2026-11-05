@@ -1,6 +1,5 @@
 import { api, errorMessage } from './api.js';
 import {
-  append,
   clearFormError,
   clearFormSuccess,
   debounce,
@@ -8,7 +7,6 @@ import {
   formatDate,
   formatDateTime,
   h,
-  icon,
   initials,
   promptDialog,
   renderPagination,
@@ -64,7 +62,9 @@ function renderSystem(system) {
         { class: 'system-row' },
         h('span', { class: `system-status${ok ? '' : ' is-down'}` }),
         h('strong', { text: entry.label ?? entry.name }),
-        h('span', { text: entry.lastSeenAt ? formatDateTime(entry.lastSeenAt) : 'Tidak diketahui' }),
+        h('span', {
+          text: entry.lastSeenAt ? formatDateTime(entry.lastSeenAt) : 'Tidak diketahui',
+        }),
       ),
     );
   }
@@ -85,7 +85,12 @@ function renderSummary(data) {
   ];
   for (const [label, value] of rows) {
     container.append(
-      h('div', { class: 'summary-row' }, h('span', { text: label }), h('strong', { text: String(value) })),
+      h(
+        'div',
+        { class: 'summary-row' },
+        h('span', { text: label }),
+        h('strong', { text: String(value) }),
+      ),
     );
   }
 }
@@ -102,7 +107,12 @@ function renderEmail(email) {
   ];
   for (const [label, value] of items) {
     container.append(
-      h('div', { class: 'email-stat' }, h('span', { text: label }), h('strong', { text: String(value) })),
+      h(
+        'div',
+        { class: 'email-stat' },
+        h('span', { text: label }),
+        h('strong', { text: String(value) }),
+      ),
     );
   }
 }
@@ -149,7 +159,9 @@ async function loadUsers() {
     tbody.replaceChildren();
 
     if (!data.users?.length) {
-      tbody.append(h('tr', {}, h('td', { colspan: '5', class: 'manage-empty', text: 'Tidak ada pengguna.' })));
+      tbody.append(
+        h('tr', {}, h('td', { colspan: '5', class: 'manage-empty', text: 'Tidak ada pengguna.' })),
+      );
     } else {
       for (const user of data.users) tbody.append(renderUserRow(user));
     }
@@ -197,7 +209,9 @@ function renderUserRow(user) {
       }),
     ),
     h('td', { text: formatDate(user.created_at) }),
-    h('td', { text: `${formatBytes(user.storage_used_bytes)} / ${formatBytes(user.storage_quota_bytes)}` }),
+    h('td', {
+      text: `${formatBytes(user.storage_used_bytes)} / ${formatBytes(user.storage_quota_bytes)}`,
+    }),
     h(
       'td',
       { class: 'table-actions' },
@@ -241,7 +255,10 @@ function renderUserDetail(data) {
       ['Zona waktu', user.timezone],
       ['Terdaftar', formatDate(user.created_at)],
       ['Sesi aktif', String(data.sessions ?? 0)],
-      ['Storage', `${formatBytes(user.storage_used_bytes)} / ${formatBytes(user.storage_quota_bytes)}`],
+      [
+        'Storage',
+        `${formatBytes(user.storage_used_bytes)} / ${formatBytes(user.storage_quota_bytes)}`,
+      ],
     ];
     for (const [label, value] of rows) {
       info.append(h('div', {}, h('dt', { text: label }), h('dd', { text: value })));
@@ -250,7 +267,10 @@ function renderUserDetail(data) {
 
   const form = document.querySelector('[data-admin-quota-form]');
   if (form) {
-    form.elements.storageQuotaMb.value = Math.max(1, Math.round(Number(user.storage_quota_bytes) / (1024 * 1024)));
+    form.elements.storageQuotaMb.value = Math.max(
+      1,
+      Math.round(Number(user.storage_quota_bytes) / (1024 * 1024)),
+    );
     form.elements.folderLimit.value = user.folder_limit;
     form.elements.tagLimit.value = user.tag_limit;
     const hint = form.querySelector('[data-admin-quota-hint]');
@@ -281,7 +301,12 @@ function renderUserDetail(data) {
     ];
     for (const [label, value] of rows) {
       statsContainer.append(
-        h('div', { class: 'summary-row' }, h('span', { text: label }), h('strong', { text: String(value) })),
+        h(
+          'div',
+          { class: 'summary-row' },
+          h('span', { text: label }),
+          h('strong', { text: String(value) }),
+        ),
       );
     }
   }

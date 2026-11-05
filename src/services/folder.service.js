@@ -43,14 +43,14 @@ export async function assertFolderOwnership(userId, folderId, client = null) {
 export async function createFolder(userId, name) {
   try {
     return await withTransaction(async (client) => {
-      const user = await client.query(
-        'SELECT folder_limit FROM users WHERE id = $1 FOR UPDATE',
-        [userId],
-      );
-      if (user.rowCount === 0) throw new HttpError(404, 'Pengguna tidak ditemukan', 'not_found');
-      const count = await client.query('SELECT count(*)::int AS count FROM folders WHERE user_id = $1', [
+      const user = await client.query('SELECT folder_limit FROM users WHERE id = $1 FOR UPDATE', [
         userId,
       ]);
+      if (user.rowCount === 0) throw new HttpError(404, 'Pengguna tidak ditemukan', 'not_found');
+      const count = await client.query(
+        'SELECT count(*)::int AS count FROM folders WHERE user_id = $1',
+        [userId],
+      );
       if (count.rows[0].count >= Number(user.rows[0].folder_limit)) {
         throw new HttpError(
           422,

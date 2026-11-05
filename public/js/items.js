@@ -1,6 +1,5 @@
 import { api, errorMessage } from './api.js';
 import {
-  append,
   confirmDialog,
   debounce,
   emptyState,
@@ -217,7 +216,12 @@ function renderItems(data) {
 }
 
 function newItemButton() {
-  return h('a', { class: 'btn btn-primary btn-sm', href: '/app/items/new' }, icon('plus'), 'Tambah item');
+  return h(
+    'a',
+    { class: 'btn btn-primary btn-sm', href: '/app/items/new' },
+    icon('plus'),
+    'Tambah item',
+  );
 }
 
 function chip(iconName, text, className = 'chip') {
@@ -238,7 +242,11 @@ function renderCard(item) {
       actionButton('trash', 'Hapus permanen', 'permanent'),
     );
   } else {
-    const favorite = actionButton('star', item.isFavorite ? 'Hapus dari favorit' : 'Tandai favorit', 'favorite');
+    const favorite = actionButton(
+      'star',
+      item.isFavorite ? 'Hapus dari favorit' : 'Tandai favorit',
+      'favorite',
+    );
     favorite.querySelector('svg')?.classList.toggle('is-active', item.isFavorite);
     actions.append(
       favorite,
@@ -266,7 +274,9 @@ function renderCard(item) {
     card.append(image);
   }
 
-  card.append(h('a', { class: 'item-card-title', href: `/app/items/${item.id}`, text: item.title }));
+  card.append(
+    h('a', { class: 'item-card-title', href: `/app/items/${item.id}`, text: item.title }),
+  );
 
   if (item.description) {
     card.append(h('p', { class: 'item-card-desc', text: item.description }));
@@ -286,8 +296,10 @@ function renderCard(item) {
       : 'Pengingat aktif';
     meta.append(chip('bell', label, 'chip chip-reminder'));
   }
-  if (item.priority === 'high') meta.append(chip(null, priorityLabel('high'), 'chip chip-priority-high'));
-  if (item.priority === 'low') meta.append(chip(null, priorityLabel('low'), 'chip chip-priority-low'));
+  if (item.priority === 'high')
+    meta.append(chip(null, priorityLabel('high'), 'chip chip-priority-high'));
+  if (item.priority === 'low')
+    meta.append(chip(null, priorityLabel('low'), 'chip chip-priority-low'));
   if (item.deletedAt) meta.append(chip('trash', 'Di Trash', 'chip'));
   if (meta.childElementCount) card.append(meta);
 
@@ -321,7 +333,9 @@ async function handleAction(action, id, title) {
   try {
     if (action === 'favorite') {
       const card = elements.grid.querySelector(`[data-item-id="${CSS.escape(id)}"]`);
-      const active = card?.querySelector('[data-item-action="favorite"] svg')?.classList.contains('is-active');
+      const active = card
+        ?.querySelector('[data-item-action="favorite"] svg')
+        ?.classList.contains('is-active');
       const result = await api(`/api/items/${id}/favorite`, {
         method: 'POST',
         body: { value: !active },

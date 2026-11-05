@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { query, withTransaction } from '../db/pool.js';
 import { HttpError } from '../lib/errors.js';
+import { assertFolderOwnership } from './folder.service.js';
 import {
   generateImageThumbnail,
   persistItemFile,
@@ -9,7 +10,6 @@ import {
   removeRelativeFiles,
   reserveStorage,
 } from './storage.service.js';
-import { assertFolderOwnership } from './folder.service.js';
 import { assertTagsOwnership } from './tag.service.js';
 
 const ITEM_SELECT = `
@@ -80,8 +80,7 @@ export function toPublicItem(row) {
           downloadUrl: `/api/items/${row.id}/file?download=1`,
         }
       : null,
-    thumbnailUrl:
-      isImage && row.thumbnail_path ? `/api/items/${row.id}/thumbnail` : null,
+    thumbnailUrl: isImage && row.thumbnail_path ? `/api/items/${row.id}/thumbnail` : null,
     link: isLink
       ? {
           imageUrl: row.custom_thumbnail_path
@@ -212,7 +211,10 @@ export async function listItems(userId, filters = {}, pagination = { page: 1, pe
     listParams,
   );
 
-  const countResult = await query(`SELECT count(*)::int AS total FROM items i WHERE ${where}`, params);
+  const countResult = await query(
+    `SELECT count(*)::int AS total FROM items i WHERE ${where}`,
+    params,
+  );
 
   return {
     items: itemsResult.rows.map(toPublicItem),

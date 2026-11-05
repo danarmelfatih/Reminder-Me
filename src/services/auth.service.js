@@ -168,7 +168,8 @@ export async function createSession(userId, { remember = false, ip, userAgent } 
   const raw = randomToken(32);
   const tokenHash = sha256(raw);
   const expiresAt = new Date(
-    Date.now() + (remember ? config.sessionRememberDays * 24 : config.sessionDefaultHours) * 3600000,
+    Date.now() +
+      (remember ? config.sessionRememberDays * 24 : config.sessionDefaultHours) * 3600000,
   );
   const result = await query(
     `INSERT INTO sessions (user_id, token_hash, remember, expires_at, ip, user_agent)

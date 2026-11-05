@@ -2,12 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileTypeFromFile } from 'file-type';
 import sharp from 'sharp';
-import {
-  allowedExtensions,
-  config,
-  documentMimeTypes,
-  imageMimeTypes,
-} from '../config.js';
+import { allowedExtensions, config, documentMimeTypes, imageMimeTypes } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { randomHex } from '../lib/tokens.js';
@@ -37,12 +32,15 @@ function legacyCfbMime(extension) {
 }
 
 export function fileExtension(originalName) {
-  return path.extname(originalName || '').slice(1).toLowerCase();
+  return path
+    .extname(originalName || '')
+    .slice(1)
+    .toLowerCase();
 }
 
 export function safeDownloadName(name, fallback = 'file') {
   const base = path.basename(String(name || fallback));
-  const cleaned = base.replace(/[^\w.\- ()\[\]]+/g, '_').trim();
+  const cleaned = base.replace(/[^\w.\- ()[\]]+/g, '_').trim();
   return cleaned || fallback;
 }
 
@@ -76,11 +74,7 @@ export async function validateUploadedFile(file, expectedKind) {
 
   if (isImage) {
     if (!detected || !imageMimeTypes.has(detected.mime) || detected.mime !== mime) {
-      throw new HttpError(
-        422,
-        'Isi file tidak cocok dengan ekstensi gambar',
-        'invalid_file_type',
-      );
+      throw new HttpError(422, 'Isi file tidak cocok dengan ekstensi gambar', 'invalid_file_type');
     }
     mime = detected.mime;
   } else if (extension === 'txt') {
@@ -90,7 +84,7 @@ export async function validateUploadedFile(file, expectedKind) {
     }
     mime = 'text/plain';
   } else if (extension === 'pdf') {
-    if (!detected || detected.mime !== 'application/pdf') {
+    if (detected?.mime !== 'application/pdf') {
       throw new HttpError(422, 'File PDF tidak valid', 'invalid_file_type');
     }
     mime = detected.mime;
@@ -159,13 +153,11 @@ export async function generateCachedImage(sourceAbsolutePath, targetDir, prefix,
 
 export async function removeRelativeFiles(relativePaths = []) {
   await Promise.all(
-    relativePaths
-      .filter(Boolean)
-      .map((relative) => {
-        const absolute = path.join(config.storageDir, relative);
-        if (!absolute.startsWith(config.storageDir)) return Promise.resolve();
-        return fs.promises.unlink(absolute).catch(() => {});
-      }),
+    relativePaths.filter(Boolean).map((relative) => {
+      const absolute = path.join(config.storageDir, relative);
+      if (!absolute.startsWith(config.storageDir)) return Promise.resolve();
+      return fs.promises.unlink(absolute).catch(() => {});
+    }),
   );
 }
 

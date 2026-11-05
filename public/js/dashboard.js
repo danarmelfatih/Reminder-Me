@@ -32,7 +32,13 @@ function renderGreeting(user) {
   if (!node) return;
   const hour = new Date().getHours();
   const greeting =
-    hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 19 ? 'Selamat sore' : 'Selamat malam';
+    hour < 11
+      ? 'Selamat pagi'
+      : hour < 15
+        ? 'Selamat siang'
+        : hour < 19
+          ? 'Selamat sore'
+          : 'Selamat malam';
   const firstName = user?.name?.trim().split(/\s+/)[0];
   node.textContent = firstName ? `${greeting}, ${firstName}` : greeting;
 }
@@ -59,7 +65,9 @@ function renderUpcoming(reminders, timezone) {
   container.replaceChildren();
 
   if (!reminders.length) {
-    container.append(h('p', { class: 'empty-mini', text: 'Tidak ada pengingat dalam tujuh hari ke depan.' }));
+    container.append(
+      h('p', { class: 'empty-mini', text: 'Tidak ada pengingat dalam tujuh hari ke depan.' }),
+    );
     return;
   }
 
@@ -77,7 +85,10 @@ function renderUpcoming(reminders, timezone) {
           }`,
         }),
       ),
-      h('span', { class: 'compact-item-meta', text: reminder.type === 'recurring' ? 'Berulang' : 'Sekali' }),
+      h('span', {
+        class: 'compact-item-meta',
+        text: reminder.type === 'recurring' ? 'Berulang' : 'Sekali',
+      }),
     ]);
     container.append(link);
   }
@@ -89,7 +100,9 @@ function renderRecent(items, timezone) {
   container.replaceChildren();
 
   if (!items.length) {
-    container.append(h('p', { class: 'empty-mini', text: 'Belum ada item. Mulai dengan menyimpan sesuatu.' }));
+    container.append(
+      h('p', { class: 'empty-mini', text: 'Belum ada item. Mulai dengan menyimpan sesuatu.' }),
+    );
     return;
   }
 
@@ -125,7 +138,8 @@ function renderStorage(storage) {
   if (remaining) remaining.textContent = formatBytes(storage.remaining);
   if (message) {
     if (storage.level === 'full') {
-      message.textContent = 'Kapasitas penuh. Hapus file atau kosongkan Trash untuk membebaskan ruang.';
+      message.textContent =
+        'Kapasitas penuh. Hapus file atau kosongkan Trash untuk membebaskan ruang.';
     } else if (storage.level === 'critical') {
       message.textContent = 'Kapasitas hampir penuh. Segera kosongkan Trash atau hapus file besar.';
     } else if (storage.level === 'warning') {

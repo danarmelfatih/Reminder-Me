@@ -1,6 +1,6 @@
 import { config } from '../config.js';
-import { toPublicUser, getSessionUser, touchSession } from '../services/auth.service.js';
 import { HttpError } from '../lib/errors.js';
+import { getSessionUser, toPublicUser, touchSession } from '../services/auth.service.js';
 
 export async function loadUser(req, res, next) {
   const raw = req.cookies?.[config.sessionCookieName];

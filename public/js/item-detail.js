@@ -1,6 +1,5 @@
 import { api, errorMessage } from './api.js';
 import {
-  append,
   confirmDialog,
   formatBytes,
   formatDate,
@@ -9,11 +8,9 @@ import {
   icon,
   openModal,
   priorityLabel,
-  setLoading,
   timeAgo,
   toast,
   toDateTimeLocalValue,
-  typeIcon,
   typeLabel,
 } from './ui.js';
 
@@ -33,9 +30,11 @@ async function init() {
     handleQueryToast();
   } catch (error) {
     toast(errorMessage(error), 'error');
-    document.querySelector('[data-detail-content]').replaceChildren(
-      h('div', { class: 'notice notice-error' }, icon('alert'), errorMessage(error)),
-    );
+    document
+      .querySelector('[data-detail-content]')
+      .replaceChildren(
+        h('div', { class: 'notice notice-error' }, icon('alert'), errorMessage(error)),
+      );
   }
 }
 
@@ -62,7 +61,13 @@ function render() {
   container.replaceChildren();
 
   const main = h('div', { class: 'detail-main' }, renderContentCard());
-  const side = h('aside', { class: 'detail-side' }, renderInfoPanel(), renderReminderPanel(), renderActionsPanel());
+  const side = h(
+    'aside',
+    { class: 'detail-side' },
+    renderInfoPanel(),
+    renderReminderPanel(),
+    renderActionsPanel(),
+  );
   container.append(h('div', { class: 'detail-layout' }, main, side));
 }
 
@@ -71,12 +76,21 @@ function renderContentCard() {
 
   if (item.type === 'image' && item.file) {
     card.append(
-      h('div', { class: 'detail-preview' }, h('img', { src: item.file.url, alt: item.title, loading: 'lazy' })),
+      h(
+        'div',
+        { class: 'detail-preview' },
+        h('img', { src: item.file.url, alt: item.title, loading: 'lazy' }),
+      ),
     );
   } else if (item.type === 'link' && item.link?.imageUrl) {
     const link = h(
       'a',
-      { class: 'detail-preview-link', href: item.url, target: '_blank', rel: 'noopener noreferrer' },
+      {
+        class: 'detail-preview-link',
+        href: item.url,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      },
       h('img', { src: item.link.imageUrl, alt: '', loading: 'lazy' }),
       h(
         'span',
@@ -92,13 +106,20 @@ function renderContentCard() {
   if (item.description) {
     body.append(h('p', { class: 'detail-description', text: item.description }));
   } else {
-    body.append(h('p', { class: 'detail-description is-empty', text: 'Tidak ada deskripsi atau catatan tambahan.' }));
+    body.append(
+      h('p', {
+        class: 'detail-description is-empty',
+        text: 'Tidak ada deskripsi atau catatan tambahan.',
+      }),
+    );
   }
 
   if (item.tags?.length) {
     const tags = h('div', { class: 'detail-tags' });
     for (const tag of item.tags) {
-      tags.append(h('a', { class: 'chip chip-tag', href: `/app/tags/${tag.id}`, text: `#${tag.name}` }));
+      tags.append(
+        h('a', { class: 'chip chip-tag', href: `/app/tags/${tag.id}`, text: `#${tag.name}` }),
+      );
     }
     body.append(tags);
   }
@@ -117,7 +138,12 @@ function renderContentCard() {
         ),
         h(
           'a',
-          { class: 'btn btn-ghost btn-sm', href: item.url, target: '_blank', rel: 'noopener noreferrer' },
+          {
+            class: 'btn btn-ghost btn-sm',
+            href: item.url,
+            target: '_blank',
+            rel: 'noopener noreferrer',
+          },
           icon('external'),
           'Buka',
         ),
@@ -130,7 +156,11 @@ function renderContentCard() {
       h(
         'div',
         { class: 'detail-file' },
-        h('span', { class: 'detail-file-icon' }, icon(item.type === 'image' ? 'image' : 'file-text')),
+        h(
+          'span',
+          { class: 'detail-file-icon' },
+          icon(item.type === 'image' ? 'image' : 'file-text'),
+        ),
         h(
           'span',
           { class: 'detail-file-copy' },
@@ -139,7 +169,12 @@ function renderContentCard() {
             text: `${formatBytes(item.file.size)} · ${item.file.extension?.toUpperCase() ?? item.file.mime}`,
           }),
         ),
-        h('a', { class: 'btn btn-ghost btn-sm', href: item.file.downloadUrl }, icon('download'), 'Unduh'),
+        h(
+          'a',
+          { class: 'btn btn-ghost btn-sm', href: item.file.downloadUrl },
+          icon('download'),
+          'Unduh',
+        ),
       ),
     );
   }
@@ -165,7 +200,9 @@ function renderInfoPanel() {
   }
 
   for (const [label, value] of rows) {
-    list.append(h('div', { class: 'meta-row' }, h('dt', { text: label }), h('dd', { text: value })));
+    list.append(
+      h('div', { class: 'meta-row' }, h('dt', { text: label }), h('dd', { text: value })),
+    );
   }
   panel.append(list);
   return panel;
@@ -176,7 +213,10 @@ function renderReminderPanel() {
 
   if (item.deletedAt) {
     panel.append(
-      h('p', { class: 'empty-mini', text: 'Item berada di Trash. Pengingat dinonaktifkan dan tidak dapat diubah.' }),
+      h('p', {
+        class: 'empty-mini',
+        text: 'Item berada di Trash. Pengingat dinonaktifkan dan tidak dapat diubah.',
+      }),
     );
     return panel;
   }
@@ -234,7 +274,11 @@ function renderReminderPanel() {
 }
 
 function smallButton(label, handler, className = '') {
-  const button = h('button', { class: `btn btn-ghost btn-sm ${className}`.trim(), type: 'button', text: label });
+  const button = h('button', {
+    class: `btn btn-ghost btn-sm ${className}`.trim(),
+    type: 'button',
+    text: label,
+  });
   button.addEventListener('click', async () => {
     button.disabled = true;
     try {
@@ -252,7 +296,10 @@ function renderActionsPanel() {
 
   if (item.type === 'link' && item.url) {
     list.append(
-      actionLink('external', 'Buka tautan', item.url, { target: '_blank', rel: 'noopener noreferrer' }),
+      actionLink('external', 'Buka tautan', item.url, {
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }),
     );
   }
   if (item.file) {
@@ -260,7 +307,11 @@ function renderActionsPanel() {
   }
 
   list.append(
-    actionButton(item.isFavorite ? 'star' : 'star', item.isFavorite ? 'Hapus dari favorit' : 'Tandai favorit', toggleFavorite),
+    actionButton(
+      item.isFavorite ? 'star' : 'star',
+      item.isFavorite ? 'Hapus dari favorit' : 'Tandai favorit',
+      toggleFavorite,
+    ),
   );
 
   if (item.deletedAt) {
@@ -288,7 +339,12 @@ function actionLink(iconName, label, href, extra = {}) {
 }
 
 function actionButton(iconName, label, handler, className = '') {
-  const button = h('button', { class: `detail-action ${className}`.trim(), type: 'button' }, icon(iconName), label);
+  const button = h(
+    'button',
+    { class: `detail-action ${className}`.trim(), type: 'button' },
+    icon(iconName),
+    label,
+  );
   button.addEventListener('click', async () => {
     button.disabled = true;
     try {
@@ -348,7 +404,8 @@ async function restoreItem() {
 async function deletePermanently() {
   const confirmed = await confirmDialog({
     title: 'Hapus permanen?',
-    message: 'Item dan seluruh filenya akan dihapus selamanya. Tindakan ini tidak dapat dibatalkan.',
+    message:
+      'Item dan seluruh filenya akan dihapus selamanya. Tindakan ini tidak dapat dibatalkan.',
     confirmLabel: 'Hapus permanen',
     danger: true,
   });
@@ -427,16 +484,37 @@ function openReminderModal() {
   const weekdayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
   const weekdayInputs = weekdayLabels.map((label, index) => {
     const input = h('input', { type: 'checkbox', value: String(index) });
-    return { input, node: h('label', { class: 'checkbox-row' }, input, h('span', { text: label })) };
+    return {
+      input,
+      node: h('label', { class: 'checkbox-row' }, input, h('span', { text: label })),
+    };
   });
 
   const recurringFields = h(
     'div',
     { class: 'form-stack' },
-    h('div', { class: 'form-row' }, h('div', { class: 'field' }, h('label', { text: 'Frekuensi' }), frequencySelect),
-      h('div', { class: 'field' }, h('label', { text: 'Setiap' }), intervalInput)),
-    h('div', { class: 'field' }, h('label', { text: 'Hari (untuk mingguan)' }), h('div', { class: 'form-row' }, weekdayInputs.map((entry) => entry.node))),
-    h('div', { class: 'field' }, h('label', { text: 'Berulang sampai (opsional)' }), repeatUntilInput),
+    h(
+      'div',
+      { class: 'form-row' },
+      h('div', { class: 'field' }, h('label', { text: 'Frekuensi' }), frequencySelect),
+      h('div', { class: 'field' }, h('label', { text: 'Setiap' }), intervalInput),
+    ),
+    h(
+      'div',
+      { class: 'field' },
+      h('label', { text: 'Hari (untuk mingguan)' }),
+      h(
+        'div',
+        { class: 'form-row' },
+        weekdayInputs.map((entry) => entry.node),
+      ),
+    ),
+    h(
+      'div',
+      { class: 'field' },
+      h('label', { text: 'Berulang sampai (opsional)' }),
+      repeatUntilInput,
+    ),
   );
 
   const updateVisibility = () => {
@@ -479,7 +557,9 @@ function openReminderModal() {
                       interval: Math.max(1, Number(intervalInput.value) || 1),
                       weekdays:
                         frequencySelect.value === 'weekly'
-                          ? weekdayInputs.filter((entry) => entry.input.checked).map((entry) => Number(entry.input.value))
+                          ? weekdayInputs
+                              .filter((entry) => entry.input.checked)
+                              .map((entry) => Number(entry.input.value))
                           : undefined,
                       repeatUntil: repeatUntilInput.value
                         ? zonedTimeToUtc(repeatUntilInput.value, timezoneInput.value.trim())
@@ -488,7 +568,10 @@ function openReminderModal() {
                   : null,
             };
             if (!startInput.value) throw new Error('Tanggal dan waktu wajib diisi.');
-            const result = await api(`/api/items/${item.id}/reminder`, { method: 'PUT', body: payload });
+            const result = await api(`/api/items/${item.id}/reminder`, {
+              method: 'PUT',
+              body: payload,
+            });
             toast(result?.message ?? 'Pengingat disimpan.');
             close();
             await reload();

@@ -150,7 +150,11 @@ export const notificationQuerySchema = z.object({
 });
 
 export const adminQuotaSchema = z.object({
-  storageQuotaBytes: z.coerce.number().int().positive().max(10 * 1024 * 1024 * 1024 * 1024),
+  storageQuotaBytes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(10 * 1024 * 1024 * 1024 * 1024),
   folderLimit: z.coerce.number().int().positive().max(10000),
   tagLimit: z.coerce.number().int().positive().max(10000),
 });

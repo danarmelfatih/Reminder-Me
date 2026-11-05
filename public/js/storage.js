@@ -1,5 +1,5 @@
 import { api, errorMessage } from './api.js';
-import { formatBytes, h, toast } from './ui.js';
+import { formatBytes, toast } from './ui.js';
 
 init();
 
@@ -41,13 +41,16 @@ function render(data) {
   const warningText = document.querySelector('[data-storage-warning-text]');
   if (warning && warningText) {
     if (storage.level === 'full') {
-      warningText.textContent = 'Kapasitas storage penuh. Hapus file atau kosongkan Trash untuk membebaskan ruang.';
+      warningText.textContent =
+        'Kapasitas storage penuh. Hapus file atau kosongkan Trash untuk membebaskan ruang.';
       warning.hidden = false;
     } else if (storage.level === 'critical') {
-      warningText.textContent = 'Kapasitas hampir penuh (di atas 95%). Segera kosongkan Trash atau hapus file besar.';
+      warningText.textContent =
+        'Kapasitas hampir penuh (di atas 95%). Segera kosongkan Trash atau hapus file besar.';
       warning.hidden = false;
     } else if (storage.level === 'warning') {
-      warningText.textContent = 'Penggunaan storage sudah di atas 80%. Pertimbangkan merapikan file.';
+      warningText.textContent =
+        'Penggunaan storage sudah di atas 80%. Pertimbangkan merapikan file.';
       warning.hidden = false;
     } else {
       warning.hidden = true;

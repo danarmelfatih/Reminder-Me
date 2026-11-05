@@ -28,7 +28,10 @@ function submitButton() {
 }
 
 function showUnverifiedError(email) {
-  showFormError(form, 'Email Anda belum diverifikasi. Periksa kotak masuk atau kirim ulang tautan verifikasi.');
+  showFormError(
+    form,
+    'Email Anda belum diverifikasi. Periksa kotak masuk atau kirim ulang tautan verifikasi.',
+  );
   const errorBox = form.querySelector('[data-form-error]');
   if (!errorBox || errorBox.querySelector('[data-resend-inline]')) return;
   const button = h(

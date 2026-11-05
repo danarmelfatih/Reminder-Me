@@ -1,16 +1,23 @@
 import crypto from 'node:crypto';
 import express from 'express';
 import { config } from '../config.js';
-import { logger } from '../lib/logger.js';
 import { HttpError } from '../lib/errors.js';
-import { parse } from '../lib/validation.js';
+import { logger } from '../lib/logger.js';
 import {
   forgotPasswordSchema,
   loginSchema,
+  parse,
   registerSchema,
   resendVerificationSchema,
   resetPasswordSchema,
 } from '../lib/validation.js';
+import { setFlash } from '../middleware/flash.js';
+import {
+  authLimiter,
+  passwordLimiter,
+  registerLimiter,
+  resendLimiter,
+} from '../middleware/rateLimit.js';
 import {
   consumeAuthToken,
   createAuthToken,
@@ -22,7 +29,6 @@ import {
   invalidateAuthTokens,
   markEmailVerified,
   markSessionReauthenticated,
-  normalizeEmail,
   revokeAllSessions,
   revokeSession,
   sessionCookieOptions,
@@ -43,13 +49,6 @@ import {
   resetPasswordEmail,
   verificationEmail,
 } from '../services/mail.templates.js';
-import { setFlash } from '../middleware/flash.js';
-import {
-  authLimiter,
-  passwordLimiter,
-  registerLimiter,
-  resendLimiter,
-} from '../middleware/rateLimit.js';
 
 export const authRouter = express.Router();
 
@@ -195,7 +194,7 @@ authRouter.post('/reset-password', passwordLimiter, async (req, res) => {
   const data = parse(resetPasswordSchema, req.body);
   const tokenRow = await consumeAuthToken(data.token, 'password_reset');
   const user = await findUserById(tokenRow.user_id);
-  if (!user || user.status !== 'active') {
+  if (user?.status !== 'active') {
     throw new HttpError(400, 'Token tidak valid', 'invalid_token');
   }
   const hash = await hashPassword(data.password);

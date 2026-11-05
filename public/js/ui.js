@@ -10,7 +10,8 @@ export function h(tag, attrs = {}, ...children) {
     else if (key === 'text') node.textContent = value;
     else if (key === 'dataset') Object.assign(node.dataset, value);
     else if (key === 'hidden') node.hidden = Boolean(value);
-    else if (key === 'checked' || key === 'disabled' || key === 'selected') node[key] = Boolean(value);
+    else if (key === 'checked' || key === 'disabled' || key === 'selected')
+      node[key] = Boolean(value);
     else if (key === 'value') node.value = value;
     else if (key.startsWith('on') && typeof value === 'function') {
       node.addEventListener(key.slice(2).toLowerCase(), value);
@@ -81,7 +82,12 @@ export function openModal({ title, description, body, actions = [], onClose, cla
     h(
       'div',
       { class: 'modal-head' },
-      h('div', {}, h('h2', { id: 'modal-title', text: title }), description ? h('p', { text: description }) : null),
+      h(
+        'div',
+        {},
+        h('h2', { id: 'modal-title', text: title }),
+        description ? h('p', { text: description }) : null,
+      ),
       closeButton,
     ),
   );
@@ -165,7 +171,13 @@ export function confirmDialog({
   });
 }
 
-export function promptDialog({ title, label, value = '', confirmLabel = 'Simpan', maxLength = 60 }) {
+export function promptDialog({
+  title,
+  label,
+  value = '',
+  confirmLabel = 'Simpan',
+  maxLength = 60,
+}) {
   return new Promise((resolve) => {
     let settled = false;
     const finish = (result) => {
@@ -325,7 +337,10 @@ export function toDateTimeLocalValue(value, timezone = 'Asia/Jakarta') {
 }
 
 export function initials(name) {
-  const parts = String(name ?? '').trim().split(/\s+/).filter(Boolean);
+  const parts = String(name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (!parts.length) return '?';
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
@@ -383,7 +398,9 @@ export function renderPagination(container, { page, totalPages, onChange }) {
   addButton('‹', page - 1, { disabled: page <= 1, ariaLabel: 'Halaman sebelumnya' });
 
   const pages = new Set([1, totalPages, page - 1, page, page + 1]);
-  const sorted = [...pages].filter((value) => value >= 1 && value <= totalPages).sort((a, b) => a - b);
+  const sorted = [...pages]
+    .filter((value) => value >= 1 && value <= totalPages)
+    .sort((a, b) => a - b);
   let previous = 0;
   for (const value of sorted) {
     if (value - previous > 1) {

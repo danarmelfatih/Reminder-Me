@@ -37,10 +37,9 @@ export async function assertTagsOwnership(userId, tagIds, client = null) {
 export async function createTag(userId, name) {
   try {
     return await withTransaction(async (client) => {
-      const user = await client.query(
-        'SELECT tag_limit FROM users WHERE id = $1 FOR UPDATE',
-        [userId],
-      );
+      const user = await client.query('SELECT tag_limit FROM users WHERE id = $1 FOR UPDATE', [
+        userId,
+      ]);
       if (user.rowCount === 0) throw new HttpError(404, 'Pengguna tidak ditemukan', 'not_found');
       const count = await client.query(
         'SELECT count(*)::int AS count FROM tags WHERE user_id = $1',

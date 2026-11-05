@@ -59,7 +59,12 @@ function render() {
     actions.append(
       h(
         'a',
-        { class: 'icon-btn', href: `/app/tags/${tag.id}`, title: 'Buka tag', 'aria-label': 'Buka tag' },
+        {
+          class: 'icon-btn',
+          href: `/app/tags/${tag.id}`,
+          title: 'Buka tag',
+          'aria-label': 'Buka tag',
+        },
         icon('chevron-right'),
       ),
       iconButton('pencil', 'Ubah nama', () => renameTag(tag)),
@@ -71,7 +76,11 @@ function render() {
 }
 
 function iconButton(iconName, label, handler) {
-  const button = h('button', { class: 'icon-btn', type: 'button', title: label, 'aria-label': label }, icon(iconName));
+  const button = h(
+    'button',
+    { class: 'icon-btn', type: 'button', title: label, 'aria-label': label },
+    icon(iconName),
+  );
   button.addEventListener('click', async () => {
     button.disabled = true;
     try {

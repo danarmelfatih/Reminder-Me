@@ -39,7 +39,9 @@ function render() {
   list.replaceChildren();
 
   if (!folders.length) {
-    list.append(h('p', { class: 'manage-empty', text: 'Belum ada folder. Buat folder pertama Anda.' }));
+    list.append(
+      h('p', { class: 'manage-empty', text: 'Belum ada folder. Buat folder pertama Anda.' }),
+    );
     return;
   }
 
@@ -59,7 +61,12 @@ function render() {
     actions.append(
       h(
         'a',
-        { class: 'icon-btn', href: `/app/folders/${folder.id}`, title: 'Buka folder', 'aria-label': 'Buka folder' },
+        {
+          class: 'icon-btn',
+          href: `/app/folders/${folder.id}`,
+          title: 'Buka folder',
+          'aria-label': 'Buka folder',
+        },
         icon('chevron-right'),
       ),
       iconButton('pencil', 'Ubah nama', () => renameFolder(folder)),
@@ -71,7 +78,11 @@ function render() {
 }
 
 function iconButton(iconName, label, handler) {
-  const button = h('button', { class: 'icon-btn', type: 'button', title: label, 'aria-label': label }, icon(iconName));
+  const button = h(
+    'button',
+    { class: 'icon-btn', type: 'button', title: label, 'aria-label': label },
+    icon(iconName),
+  );
   button.addEventListener('click', async () => {
     button.disabled = true;
     try {

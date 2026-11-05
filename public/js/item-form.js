@@ -1,6 +1,5 @@
 import { api, errorMessage } from './api.js';
 import {
-  append,
   clearFormError,
   debounce,
   formatBytes,
@@ -175,7 +174,9 @@ function validateSelectedFile() {
     return false;
   }
   if (file.size > maxBytes) {
-    showFileError(type === 'image' ? 'Ukuran gambar maksimal 10 MB.' : 'Ukuran dokumen maksimal 25 MB.');
+    showFileError(
+      type === 'image' ? 'Ukuran gambar maksimal 10 MB.' : 'Ukuran dokumen maksimal 25 MB.',
+    );
     elements.fileInput.value = '';
     return false;
   }
@@ -229,8 +230,15 @@ function renderTags(tags) {
 
   const selected = new Set((currentItem?.tags ?? []).map((tag) => tag.id));
   for (const tag of tags) {
-    const input = h('input', { type: 'checkbox', name: 'tagIds', value: tag.id, checked: selected.has(tag.id) });
-    elements.tagPicker.append(h('label', { class: 'tag-choice' }, input, h('span', { text: tag.name })));
+    const input = h('input', {
+      type: 'checkbox',
+      name: 'tagIds',
+      value: tag.id,
+      checked: selected.has(tag.id),
+    });
+    elements.tagPicker.append(
+      h('label', { class: 'tag-choice' }, input, h('span', { text: tag.name })),
+    );
   }
 }
 
@@ -361,7 +369,9 @@ function isHttpUrl(value) {
 }
 
 function selectedTagIds() {
-  return [...(app.querySelectorAll('input[name="tagIds"]:checked') ?? [])].map((input) => input.value);
+  return [...(app.querySelectorAll('input[name="tagIds"]:checked') ?? [])].map(
+    (input) => input.value,
+  );
 }
 
 function basePayload() {
