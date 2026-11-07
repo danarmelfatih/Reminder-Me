@@ -53,6 +53,10 @@ export function errorHandler(error, req, res, next) {
     status = 400;
     code = 'invalid_json';
     message = 'Format data tidak valid';
+  } else if (['22P02', '22003', '22007', '22008'].includes(error?.code)) {
+    status = 400;
+    code = 'invalid_parameter';
+    message = 'Parameter tidak valid';
   }
 
   if (status >= 500) {

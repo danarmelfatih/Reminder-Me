@@ -33,12 +33,16 @@
     "luxon": "^3.7.2",
     "mime-types": "^3.0.2",
     "multer": "^2.5.0",
+    "officeparser": "^8.6.0",
     "pg": "^8.23.1",
     "pino": "^10.4.0",
     "pino-http": "^11.0.0",
+    "ppt-to-text": "^1.0.1",
     "resend": "^6.37.0",
     "rrule": "^2.8.1",
     "sharp": "^0.35.5",
+    "word-extractor": "^1.0.4",
+    "xlsx": "^0.18.5",
     "zod": "^4.6.7"
   },
   "devDependencies": {

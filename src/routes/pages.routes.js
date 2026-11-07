@@ -1,8 +1,11 @@
 import express from 'express';
 import { config } from '../config.js';
 import { requireAuth, requireGuest } from '../middleware/auth.js';
+import { uuidParam } from '../middleware/params.js';
 
 export const pagesRouter = express.Router();
+
+pagesRouter.param('id', uuidParam);
 
 function page(res, view, options = {}) {
   const {

@@ -31,7 +31,12 @@ const schema = z.object({
 
   WORKER_POLL_MS: z.coerce.number().int().min(1000).default(15000),
   EMAIL_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
+  EMAIL_STALE_LOCK_MINUTES: z.coerce.number().int().min(1).default(15),
   NOTIFICATION_RETENTION_DAYS: z.coerce.number().int().min(1).default(90),
+  DOCUMENT_EXTRACTION_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(3),
+  DOCUMENT_EXTRACTION_STALE_MINUTES: z.coerce.number().int().min(1).default(15),
+  DOCUMENT_EXTRACTION_MAX_CHARS: z.coerce.number().int().min(1000).default(2000000),
+  DOCUMENT_EXTRACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(30000),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -80,7 +85,12 @@ export const config = {
 
   workerPollMs: env.WORKER_POLL_MS,
   emailMaxAttempts: env.EMAIL_MAX_ATTEMPTS,
+  emailStaleLockMinutes: env.EMAIL_STALE_LOCK_MINUTES,
   notificationRetentionDays: env.NOTIFICATION_RETENTION_DAYS,
+  documentExtractionMaxAttempts: env.DOCUMENT_EXTRACTION_MAX_ATTEMPTS,
+  documentExtractionStaleMinutes: env.DOCUMENT_EXTRACTION_STALE_MINUTES,
+  documentExtractionMaxChars: env.DOCUMENT_EXTRACTION_MAX_CHARS,
+  documentExtractionTimeoutMs: env.DOCUMENT_EXTRACTION_TIMEOUT_MS,
 
   sessionCookieName: 'rm_session',
   csrfCookieName: 'rm_csrf',

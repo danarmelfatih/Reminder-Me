@@ -5,9 +5,12 @@ import { config } from '../config.js';
 import { query, withTransaction } from '../db/pool.js';
 import { HttpError } from '../lib/errors.js';
 import { adminQuotaSchema, adminUserQuerySchema, parse } from '../lib/validation.js';
+import { uuidParam } from '../middleware/params.js';
 import { findUserById } from '../services/auth.service.js';
 
 export const adminRouter = express.Router();
+
+adminRouter.param('id', uuidParam);
 
 const USER_COLUMNS = `
   id, name, email, role, status, email_verified_at, timezone,

@@ -78,6 +78,14 @@
         <p class="field-hint" data-file-error hidden></p>
       </div>
 
+      <div class="field" data-thumbnail-field hidden>
+        <label for="item-thumbnail">Thumbnail kustom</label>
+        <input id="item-thumbnail" type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp" data-thumbnail-input>
+        <p class="field-hint">Opsional. JPG, PNG, atau WEBP maksimal 2 MB. Thumbnail akan diterapkan setelah item disimpan.</p>
+        <div class="thumbnail-preview" data-thumbnail-preview hidden></div>
+        <p class="field-hint" data-thumbnail-error hidden></p>
+      </div>
+
       <div class="field">
         <label for="item-description">Deskripsi / catatan</label>
         <textarea id="item-description" name="description" rows="5" maxlength="100000" placeholder="Tambahkan konteks agar mudah ditemukan kembali…"></textarea>

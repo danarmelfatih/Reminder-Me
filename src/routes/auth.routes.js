@@ -3,6 +3,7 @@ import express from 'express';
 import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
+import { safeRedirectPath } from '../lib/redirect.js';
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -56,10 +57,7 @@ const VERIFY_TTL = 24 * 60 * 60 * 1000;
 const RESET_TTL = 60 * 60 * 1000;
 
 function safeNext(value, fallback = '/app') {
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
-    return fallback;
-  }
-  return value;
+  return safeRedirectPath(value, fallback, config.appUrl);
 }
 
 function clientIp(req) {

@@ -1,6 +1,7 @@
 import express from 'express';
 import { HttpError } from '../lib/errors.js';
 import { folderSchema, parse } from '../lib/validation.js';
+import { uuidParam } from '../middleware/params.js';
 import {
   createFolder,
   deleteFolder,
@@ -9,6 +10,8 @@ import {
 } from '../services/folder.service.js';
 
 export const foldersRouter = express.Router();
+
+foldersRouter.param('id', uuidParam);
 
 foldersRouter.get('/', async (req, res) => {
   const folders = await listFolders(req.user.id);

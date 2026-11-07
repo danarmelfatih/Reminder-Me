@@ -139,16 +139,31 @@ export async function generateImageThumbnail({ sourceAbsolutePath, userId, itemI
   }
 }
 
-export async function generateCachedImage(sourceAbsolutePath, targetDir, prefix, maxWidth = 1200) {
+export async function generateCachedImage(
+  source,
+  targetDir,
+  prefix,
+  maxWidth = 1200,
+  format = 'webp',
+) {
   await fs.promises.mkdir(targetDir, { recursive: true });
-  const filename = `${prefix}-${randomHex(10)}.webp`;
+  const extension = format === 'png' ? 'png' : 'webp';
+  const filename = `${prefix}-${randomHex(10)}.${extension}`;
   const destination = path.join(targetDir, filename);
-  await sharp(sourceAbsolutePath)
-    .rotate()
-    .resize(maxWidth, maxWidth, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(destination);
-  return path.relative(config.storageDir, destination);
+  try {
+    const image = sharp(source)
+      .rotate()
+      .resize(maxWidth, maxWidth, { fit: 'inside', withoutEnlargement: true });
+    if (format === 'png') {
+      await image.png({ compressionLevel: 9 }).toFile(destination);
+    } else {
+      await image.webp({ quality: 80 }).toFile(destination);
+    }
+    return path.relative(config.storageDir, destination);
+  } catch (error) {
+    await fs.promises.unlink(destination).catch(() => {});
+    throw error;
+  }
 }
 
 export async function removeRelativeFiles(relativePaths = []) {
@@ -162,9 +177,14 @@ export async function removeRelativeFiles(relativePaths = []) {
 }
 
 export async function removeItemDirectory(userId, itemId) {
-  await fs.promises
-    .rm(path.join(config.uploadDir, userId, itemId), { recursive: true, force: true })
-    .catch(() => {});
+  await Promise.all([
+    fs.promises
+      .rm(path.join(config.uploadDir, userId, itemId), { recursive: true, force: true })
+      .catch(() => {}),
+    fs.promises
+      .rm(path.join(config.metadataDir, userId, itemId), { recursive: true, force: true })
+      .catch(() => {}),
+  ]);
 }
 
 export function absolutePath(relative) {

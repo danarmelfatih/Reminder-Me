@@ -1,8 +1,14 @@
 import crypto from 'node:crypto';
+import path from 'node:path';
+import { RRule } from 'rrule';
+import { config } from '../config.js';
 import { query, withTransaction } from '../db/pool.js';
 import { HttpError } from '../lib/errors.js';
+import { logger } from '../lib/logger.js';
 import { assertFolderOwnership } from './folder.service.js';
+import { fetchImage } from './metadata.service.js';
 import {
+  generateCachedImage,
   generateImageThumbnail,
   persistItemFile,
   releaseStorage,
@@ -21,7 +27,8 @@ const ITEM_SELECT = `
     ) AS tags,
     r.id AS reminder_id, r.is_active AS reminder_active, r.type AS reminder_type,
     r.next_run_at AS reminder_next_run_at, r.timezone AS reminder_timezone,
-    r.start_at AS reminder_start_at
+    r.start_at AS reminder_start_at, r.rrule AS reminder_rrule,
+    r.repeat_until AS reminder_repeat_until
   FROM items i
   LEFT JOIN folders f ON f.id = i.folder_id
   LEFT JOIN item_tags it ON it.item_id = i.id
@@ -45,6 +52,48 @@ function normalizeUrl(url) {
   } catch {
     return null;
   }
+}
+
+const RRULE_FREQUENCIES = new Map([
+  [RRule.DAILY, 'daily'],
+  [RRule.WEEKLY, 'weekly'],
+  [RRule.MONTHLY, 'monthly'],
+  [RRule.YEARLY, 'yearly'],
+]);
+
+function recurrenceFromRule(rruleText, repeatUntil) {
+  if (!rruleText) return null;
+  try {
+    const rule = RRule.fromString(rruleText);
+    return {
+      frequency: RRULE_FREQUENCIES.get(rule.options.freq) ?? 'daily',
+      interval: Math.max(1, Number(rule.options.interval) || 1),
+      weekdays: (rule.options.byweekday ?? []).map((day) => (Number(day) + 1) % 7),
+      repeatUntil: repeatUntil ?? rule.options.until ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function cacheLinkAssets({ userId, itemId, metadata }) {
+  const targetDir = path.join(config.metadataDir, userId, itemId);
+  const cache = async (url, prefix, maxWidth, format) => {
+    if (!url) return null;
+    try {
+      const image = await fetchImage(url);
+      return await generateCachedImage(image.buffer, targetDir, prefix, maxWidth, format);
+    } catch (error) {
+      logger.warn({ err: error, userId, itemId, prefix }, 'Failed to cache link asset');
+      return null;
+    }
+  };
+
+  const [ogImagePath, faviconPath] = await Promise.all([
+    cache(metadata?.imageUrl, 'og', 1200, 'webp'),
+    cache(metadata?.faviconUrl, 'favicon', 128, 'png'),
+  ]);
+  return { ogImagePath, faviconPath };
 }
 
 export function toPublicItem(row) {
@@ -100,6 +149,7 @@ export function toPublicItem(row) {
           nextRunAt: row.reminder_next_run_at,
           timezone: row.reminder_timezone,
           startAt: row.reminder_start_at,
+          recurrence: recurrenceFromRule(row.reminder_rrule, row.reminder_repeat_until),
         }
       : null,
     createdAt: row.created_at,
@@ -250,10 +300,10 @@ export async function assertItemOwnership(userId, itemId, client = null) {
   return item;
 }
 
-async function replaceTags(client, userId, itemId, tagIds) {
+async function replaceTags(client, itemId, tagIds) {
   await client.query('DELETE FROM item_tags WHERE item_id = $1', [itemId]);
   if (tagIds?.length) {
-    const values = tagIds.map((tagId, index) => `($1, $${index + 2})`).join(', ');
+    const values = tagIds.map((_, index) => `($1, $${index + 2})`).join(', ');
     await client.query(`INSERT INTO item_tags (item_id, tag_id) VALUES ${values}`, [
       itemId,
       ...tagIds,
@@ -282,6 +332,7 @@ export async function createItem(user, data, fileInfo = null) {
   let thumbnailPath = null;
   let linkUrl = null;
   let domain = null;
+  let cachedAssets = { ogImagePath: null, faviconPath: null };
 
   if (type === 'link') {
     linkUrl = normalizeUrl(url);
@@ -289,6 +340,11 @@ export async function createItem(user, data, fileInfo = null) {
       throw new HttpError(422, 'URL tidak valid', 'invalid_url');
     }
     domain = domainFromUrl(linkUrl);
+    cachedAssets = await cacheLinkAssets({
+      userId: user.id,
+      itemId,
+      metadata: linkMetadata,
+    });
   }
 
   if (fileInfo) {
@@ -316,8 +372,8 @@ export async function createItem(user, data, fileInfo = null) {
         `INSERT INTO items
           (id, user_id, type, title, description, url, domain, link_metadata,
            file_path, file_name, file_mime, file_ext, file_size, thumbnail_path,
-           folder_id, priority, is_favorite)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
+           og_image_path, favicon_path, folder_id, priority, is_favorite)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`,
         [
           itemId,
           user.id,
@@ -333,18 +389,21 @@ export async function createItem(user, data, fileInfo = null) {
           fileInfo?.validated.extension ?? null,
           fileInfo?.validated.size ?? 0,
           thumbnailPath,
+          cachedAssets.ogImagePath,
+          cachedAssets.faviconPath,
           folderId || null,
           priority,
           isFavorite,
         ],
       );
-      await replaceTags(client, user.id, itemId, validTagIds);
+      await replaceTags(client, itemId, validTagIds);
       if (type === 'document') {
         await client.query('INSERT INTO item_contents (item_id) VALUES ($1)', [itemId]);
       }
     });
   } catch (error) {
     await removeItemDirectory(user.id, itemId);
+    await removeRelativeFiles(Object.values(cachedAssets));
     throw error;
   }
 
@@ -380,15 +439,18 @@ export async function updateItem(userId, itemId, data) {
   if (data.isFavorite !== undefined) set('is_favorite', data.isFavorite);
 
   const pathsToRemove = [];
+  let cachedAssets = { ogImagePath: null, faviconPath: null };
   if (data.url !== undefined && existing.type === 'link') {
     const normalized = normalizeUrl(data.url);
     if (!normalized) throw new HttpError(422, 'URL tidak valid', 'invalid_url');
     if (normalized !== existing.url) {
+      const linkMetadata = data.linkMetadata ?? null;
       set('url', normalized);
       set('domain', domainFromUrl(normalized));
-      set('link_metadata', null);
-      set('og_image_path', null);
-      set('favicon_path', null);
+      set('link_metadata', linkMetadata ? JSON.stringify(linkMetadata) : null);
+      cachedAssets = await cacheLinkAssets({ userId, itemId, metadata: linkMetadata });
+      set('og_image_path', cachedAssets.ogImagePath);
+      set('favicon_path', cachedAssets.faviconPath);
       if (existing.og_image_path) pathsToRemove.push(existing.og_image_path);
       if (existing.favicon_path) pathsToRemove.push(existing.favicon_path);
     }
@@ -399,17 +461,22 @@ export async function updateItem(userId, itemId, data) {
   }
 
   values.push(itemId, userId);
-  await withTransaction(async (client) => {
-    if (fields.length > 0) {
-      await client.query(
-        `UPDATE items SET ${fields.join(', ')} WHERE id = $${index} AND user_id = $${index + 1}`,
-        values,
-      );
-    }
-    if (validTagIds !== undefined) {
-      await replaceTags(client, userId, itemId, validTagIds);
-    }
-  });
+  try {
+    await withTransaction(async (client) => {
+      if (fields.length > 0) {
+        await client.query(
+          `UPDATE items SET ${fields.join(', ')} WHERE id = $${index} AND user_id = $${index + 1}`,
+          values,
+        );
+      }
+      if (validTagIds !== undefined) {
+        await replaceTags(client, itemId, validTagIds);
+      }
+    });
+  } catch (error) {
+    await removeRelativeFiles(Object.values(cachedAssets));
+    throw error;
+  }
 
   await removeRelativeFiles(pathsToRemove);
   return getItem(userId, itemId);
@@ -485,11 +552,20 @@ export async function restoreItem(userId, itemId) {
 
 export async function deleteItemPermanently(userId, itemId) {
   const existing = await assertItemOwnership(userId, itemId);
+  if (!existing.deleted_at) {
+    throw new HttpError(
+      400,
+      'Hapus permanen hanya tersedia untuk item di Trash',
+      'item_not_in_trash',
+    );
+  }
   const fileSize = Number(existing.file_size);
 
   await withTransaction(async (client) => {
     const result = await client.query(
-      'DELETE FROM items WHERE id = $1 AND user_id = $2 RETURNING id',
+      `DELETE FROM items
+       WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL
+       RETURNING id`,
       [itemId, userId],
     );
     if (result.rowCount === 0) {

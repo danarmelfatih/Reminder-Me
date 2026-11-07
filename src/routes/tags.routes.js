@@ -1,9 +1,12 @@
 import express from 'express';
 import { HttpError } from '../lib/errors.js';
 import { parse, tagSchema } from '../lib/validation.js';
+import { uuidParam } from '../middleware/params.js';
 import { createTag, deleteTag, listTags, renameTag } from '../services/tag.service.js';
 
 export const tagsRouter = express.Router();
+
+tagsRouter.param('id', uuidParam);
 
 tagsRouter.get('/', async (req, res) => {
   const tags = await listTags(req.user.id);

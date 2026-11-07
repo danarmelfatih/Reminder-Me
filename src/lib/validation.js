@@ -34,6 +34,31 @@ export const timezoneSchema = z
     }
   }, 'Zona waktu tidak valid');
 
+export const uuidSchema = z.string().trim().uuid('ID tidak valid');
+
+export const dateSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Tanggal harus berformat YYYY-MM-DD')
+  .refine((value) => {
+    const date = new Date(`${value}T00:00:00.000Z`);
+    return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+  }, 'Tanggal tidak valid');
+
+const emptyToUndefined = (value) => (value === '' || value === null ? undefined : value);
+
+export const itemFilterQuerySchema = z
+  .object({
+    folderId: z.preprocess(emptyToUndefined, z.union([uuidSchema, z.literal('none')]).optional()),
+    tagId: z.preprocess(emptyToUndefined, uuidSchema.optional()),
+    dateFrom: z.preprocess(emptyToUndefined, dateSchema.optional()),
+    dateTo: z.preprocess(emptyToUndefined, dateSchema.optional()),
+  })
+  .refine(
+    (data) => !data.dateFrom || !data.dateTo || data.dateFrom <= data.dateTo,
+    'Rentang tanggal tidak valid',
+  );
+
 export const registerSchema = z.object({
   name: nameSchema,
   email: emailSchema,
@@ -123,6 +148,7 @@ export const itemUpdateSchema = z.object({
   tagIds: z.array(z.string().uuid()).max(100).optional(),
   isFavorite: z.boolean().optional(),
   url: z.string().trim().max(2048).optional(),
+  linkMetadata: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 
 export const reminderSchema = z.object({

@@ -1,5 +1,6 @@
 import express from 'express';
 import { notificationQuerySchema, parse } from '../lib/validation.js';
+import { uuidParam } from '../middleware/params.js';
 import {
   listNotifications,
   markAllNotificationsRead,
@@ -8,6 +9,8 @@ import {
 } from '../services/notification.service.js';
 
 export const notificationsRouter = express.Router();
+
+notificationsRouter.param('id', uuidParam);
 
 notificationsRouter.get('/', async (req, res) => {
   const data = parse(notificationQuerySchema, req.query);

@@ -2279,6 +2279,33 @@ button {
   overflow: hidden;
 }
 
+.thumbnail-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+}
+
+.thumbnail-preview img {
+  width: 96px;
+  height: 64px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--surface-3);
+}
+
+.thumbnail-preview-copy {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .tag-picker {
   display: flex;
   flex-wrap: wrap;

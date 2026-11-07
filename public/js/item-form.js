@@ -28,6 +28,10 @@ const elements = {
   dropzoneTitle: app?.querySelector('[data-dropzone-title]'),
   dropzoneHint: app?.querySelector('[data-dropzone-hint]'),
   fileError: app?.querySelector('[data-file-error]'),
+  thumbnailField: app?.querySelector('[data-thumbnail-field]'),
+  thumbnailInput: app?.querySelector('[data-thumbnail-input]'),
+  thumbnailPreview: app?.querySelector('[data-thumbnail-preview]'),
+  thumbnailError: app?.querySelector('[data-thumbnail-error]'),
   metadataStatus: app?.querySelector('[data-metadata-status]'),
   metadataPreview: app?.querySelector('[data-metadata-preview]'),
   title: app?.querySelector('#item-title'),
@@ -44,10 +48,14 @@ const elements = {
 let type = mode === 'create' ? app.dataset.initialType || 'link' : 'link';
 let currentItem = null;
 let metadata = null;
+let metadataUrl = null;
 let metadataRequest = 0;
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 const DOCUMENT_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'];
+const THUMBNAIL_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+let thumbnailObjectUrl = null;
 
 function init() {
   bindEvents();
@@ -65,6 +73,10 @@ function bindEvents() {
   elements.fileInput?.addEventListener('change', () => {
     validateSelectedFile();
     updateDropzone();
+  });
+
+  elements.thumbnailInput?.addEventListener('change', () => {
+    if (validateSelectedThumbnail()) updateThumbnailPreview();
   });
 
   for (const eventName of ['dragenter', 'dragover']) {
@@ -115,6 +127,7 @@ function setType(nextType) {
   const showFile = (type === 'image' || type === 'document') && mode === 'create';
   if (elements.urlField) elements.urlField.hidden = !showUrl;
   if (elements.fileField) elements.fileField.hidden = !showFile;
+  if (elements.thumbnailField) elements.thumbnailField.hidden = !showUrl;
 
   if (elements.fileInput) {
     elements.fileInput.accept =
@@ -181,6 +194,63 @@ function validateSelectedFile() {
     return false;
   }
   return true;
+}
+
+function validateSelectedThumbnail() {
+  const file = elements.thumbnailInput?.files?.[0];
+  if (!file) return true;
+  if (elements.thumbnailError) elements.thumbnailError.hidden = true;
+
+  const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+  if (!THUMBNAIL_EXTENSIONS.includes(extension)) {
+    showThumbnailError('Thumbnail harus JPG, PNG, atau WEBP.');
+    elements.thumbnailInput.value = '';
+    clearThumbnailPreview();
+    return false;
+  }
+  if (file.size > MAX_THUMBNAIL_BYTES) {
+    showThumbnailError('Ukuran thumbnail maksimal 2 MB.');
+    elements.thumbnailInput.value = '';
+    clearThumbnailPreview();
+    return false;
+  }
+  return true;
+}
+
+function showThumbnailError(message) {
+  if (!elements.thumbnailError) {
+    toast(message, 'error');
+    return;
+  }
+  elements.thumbnailError.textContent = message;
+  elements.thumbnailError.hidden = false;
+}
+
+function clearThumbnailPreview() {
+  if (thumbnailObjectUrl) {
+    URL.revokeObjectURL(thumbnailObjectUrl);
+    thumbnailObjectUrl = null;
+  }
+  if (elements.thumbnailPreview) {
+    elements.thumbnailPreview.replaceChildren();
+    elements.thumbnailPreview.hidden = true;
+  }
+}
+
+function updateThumbnailPreview(url) {
+  if (!elements.thumbnailPreview) return;
+  const file = elements.thumbnailInput?.files?.[0];
+  const source = file ? URL.createObjectURL(file) : url;
+  clearThumbnailPreview();
+  if (!source) return;
+  if (file) thumbnailObjectUrl = source;
+
+  const image = h('img', { src: source, alt: 'Pratinjau thumbnail', loading: 'lazy' });
+  elements.thumbnailPreview.append(
+    image,
+    h('span', { class: 'thumbnail-preview-copy', text: file ? file.name : 'Thumbnail saat ini' }),
+  );
+  elements.thumbnailPreview.hidden = false;
 }
 
 function showFileError(message) {
@@ -266,6 +336,7 @@ async function loadItem() {
           : `${typeLabel(currentItem.type)}. File tidak dapat diganti; hapus dan simpan ulang bila perlu.`;
     }
     renderExistingFile();
+    updateThumbnailPreview(currentItem.link?.imageUrl);
 
     if (elements.cancel) elements.cancel.href = `/app/items/${itemId}`;
     updateDescriptionCount();
@@ -300,6 +371,8 @@ async function fetchMetadata() {
   if (type !== 'link' || !elements.urlInput) return;
   const url = elements.urlInput.value.trim();
   if (!isHttpUrl(url)) {
+    metadata = null;
+    metadataUrl = null;
     if (elements.metadataPreview) elements.metadataPreview.hidden = true;
     return;
   }
@@ -314,6 +387,7 @@ async function fetchMetadata() {
     const data = await api(`/api/metadata?url=${encodeURIComponent(url)}`);
     if (requestId !== metadataRequest) return;
     metadata = data.metadata;
+    metadataUrl = url;
     renderMetadata(metadata);
 
     if (elements.title && !elements.title.value.trim() && metadata.title) {
@@ -326,6 +400,7 @@ async function fetchMetadata() {
   } catch (error) {
     if (requestId !== metadataRequest) return;
     metadata = null;
+    metadataUrl = null;
     if (elements.metadataPreview) elements.metadataPreview.hidden = true;
     if (elements.metadataStatus) {
       elements.metadataStatus.textContent = `Metadata tidak tersedia: ${errorMessage(error)}`;
@@ -385,6 +460,14 @@ function basePayload() {
   };
 }
 
+async function uploadCustomThumbnail(id) {
+  const file = elements.thumbnailInput?.files?.[0];
+  if (!file) return null;
+  const data = new FormData();
+  data.set('thumbnail', file);
+  return api(`/api/items/${id}/thumbnail`, { method: 'POST', formData: data });
+}
+
 async function submitForm() {
   clearFormError(form);
   const title = elements.title?.value.trim();
@@ -397,6 +480,11 @@ async function submitForm() {
   if (type === 'link' && !isHttpUrl(elements.urlInput?.value.trim())) {
     showFormError(form, 'URL harus diawali http:// atau https://.');
     elements.urlInput?.focus();
+    return;
+  }
+
+  if (type === 'link' && !validateSelectedThumbnail()) {
+    showFormError(form, 'Thumbnail tidak valid. Periksa format dan ukuran.');
     return;
   }
 
@@ -425,21 +513,40 @@ async function submitForm() {
         tagIds: payload.tagIds,
         isFavorite: payload.isFavorite,
       };
-      if (type === 'link') update.url = elements.urlInput.value.trim();
+      if (type === 'link') {
+        const url = elements.urlInput.value.trim();
+        update.url = url;
+        if (url !== currentItem?.url) {
+          update.linkMetadata = metadataUrl === url ? metadata : null;
+        }
+      }
       result = await api(`/api/items/${itemId}`, { method: 'PATCH', body: update });
-      toast(result?.message ?? 'Item diperbarui.');
+      if (type === 'link' && elements.thumbnailInput?.files?.length) {
+        try {
+          await uploadCustomThumbnail(itemId);
+          toast('Item dan thumbnail diperbarui.');
+        } catch (error) {
+          toast(`Item diperbarui, tetapi thumbnail gagal: ${errorMessage(error)}`, 'error');
+        }
+      } else {
+        toast(result?.message ?? 'Item diperbarui.');
+      }
       window.location.assign(`/app/items/${itemId}?updated=1`);
       return;
     }
 
     if (type === 'link' || type === 'text') {
+      const url = elements.urlInput.value.trim();
       result = await api('/api/items', {
         method: 'POST',
         body: {
           type,
           ...payload,
           ...(type === 'link'
-            ? { url: elements.urlInput.value.trim(), linkMetadata: metadata ?? undefined }
+            ? {
+                url,
+                linkMetadata: metadataUrl === url ? (metadata ?? undefined) : undefined,
+              }
             : {}),
         },
       });
@@ -456,7 +563,16 @@ async function submitForm() {
       result = await api('/api/items', { method: 'POST', formData: data });
     }
 
-    toast(result?.message ?? 'Item disimpan.');
+    if (type === 'link' && elements.thumbnailInput?.files?.length) {
+      try {
+        await uploadCustomThumbnail(result.item.id);
+        toast('Item dan thumbnail disimpan.');
+      } catch (error) {
+        toast(`Item tersimpan, tetapi thumbnail gagal: ${errorMessage(error)}`, 'error');
+      }
+    } else {
+      toast(result?.message ?? 'Item disimpan.');
+    }
     window.location.assign(`/app/items/${result.item.id}?created=1`);
   } catch (error) {
     showFormError(form, errorMessage(error));

@@ -23,6 +23,32 @@ if (form && mode) {
   });
 }
 
+function hasUnsafePathChars(value) {
+  for (const char of value) {
+    const code = char.charCodeAt(0);
+    if (char === '\\' || code < 0x20 || code === 0x7f) return true;
+  }
+  return false;
+}
+
+function safeRedirectPath(value, fallback = '/app') {
+  if (
+    typeof value !== 'string' ||
+    !value.startsWith('/') ||
+    value.startsWith('//') ||
+    hasUnsafePathChars(value)
+  ) {
+    return fallback;
+  }
+  try {
+    const target = new URL(value, window.location.origin);
+    if (target.origin !== window.location.origin) return fallback;
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return fallback;
+  }
+}
+
 function submitButton() {
   return form.querySelector('[data-submit]');
 }
@@ -72,8 +98,7 @@ async function handleLogin() {
       method: 'POST',
       body: { email, password, remember: form.remember?.checked ?? false },
     });
-    const next = document.body.dataset.next || '/app';
-    window.location.assign(next.startsWith('/') && !next.startsWith('//') ? next : '/app');
+    window.location.assign(safeRedirectPath(document.body.dataset.next));
   } catch (error) {
     if (error.code === 'email_unverified') showUnverifiedError(email);
     else showFormError(form, errorMessage(error));

@@ -444,8 +444,8 @@ async function deleteReminder() {
 }
 
 function openReminderModal() {
-  const timezone = user?.timezone || 'Asia/Jakarta';
   const reminder = item.reminder;
+  const timezone = reminder?.timezone || user?.timezone || 'Asia/Jakarta';
 
   const typeSelect = h(
     'select',
@@ -489,6 +489,18 @@ function openReminderModal() {
       node: h('label', { class: 'checkbox-row' }, input, h('span', { text: label })),
     };
   });
+
+  if (reminder?.recurrence) {
+    frequencySelect.value = reminder.recurrence.frequency;
+    intervalInput.value = String(reminder.recurrence.interval ?? 1);
+    const selectedWeekdays = new Set(reminder.recurrence.weekdays ?? []);
+    for (const [index, entry] of weekdayInputs.entries()) {
+      entry.input.checked = selectedWeekdays.has(index);
+    }
+    if (reminder.recurrence.repeatUntil) {
+      repeatUntilInput.value = toDateTimeLocalValue(reminder.recurrence.repeatUntil, timezone);
+    }
+  }
 
   const recurringFields = h(
     'div',

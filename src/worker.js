@@ -2,9 +2,11 @@ import { RRule } from 'rrule';
 import { config, ensureStorageDirs } from './config.js';
 import { query, withTransaction } from './db/pool.js';
 import { logger } from './lib/logger.js';
+import { extractDocumentText } from './services/extraction.service.js';
 import { sendMail } from './services/mail.service.js';
 import { reminderEmail, trashWarningEmail } from './services/mail.templates.js';
 import {
+  absolutePath,
   releaseStorage,
   removeItemDirectory,
   removeRelativeFiles,
@@ -353,18 +355,100 @@ export async function purgeTrash() {
   return purged;
 }
 
+export async function processDocumentExtractions() {
+  const claimed = await query(
+    `UPDATE item_contents ic
+     SET extraction_status = 'processing',
+         extraction_attempts = extraction_attempts + 1,
+         updated_at = now()
+     WHERE ic.item_id IN (
+       SELECT pending.item_id
+       FROM item_contents pending
+       JOIN items i ON i.id = pending.item_id
+       WHERE pending.extraction_attempts < $1
+         AND (
+           pending.extraction_status = 'pending'
+           OR (
+             pending.extraction_status = 'processing'
+             AND pending.updated_at < now() - make_interval(mins => $2)
+           )
+         )
+       ORDER BY pending.updated_at
+       LIMIT $3
+       FOR UPDATE SKIP LOCKED
+     )
+     RETURNING ic.item_id, ic.extraction_attempts`,
+    [config.documentExtractionMaxAttempts, config.documentExtractionStaleMinutes, BATCH_SIZE],
+  );
+
+  let processed = 0;
+  let failed = 0;
+  for (const content of claimed.rows) {
+    const itemResult = await query(
+      'SELECT id, file_path, file_ext FROM items WHERE id = $1',
+      [content.item_id],
+    );
+    const item = itemResult.rows[0];
+    if (!item) continue;
+
+    const file = absolutePath(item.file_path);
+    try {
+      if (!file) throw new Error('File item tidak ditemukan');
+      const result = await extractDocumentText(file, item.file_ext);
+      await query(
+        `UPDATE item_contents
+         SET extraction_status = $1,
+             extracted_text = $2,
+             extraction_error = $3,
+             extracted_at = now(),
+             char_count = $4,
+             updated_at = now()
+         WHERE item_id = $5`,
+        [result.status, result.text || null, result.error, result.text.length, item.id],
+      );
+      processed += 1;
+    } catch (error) {
+      const attempts = Number(content.extraction_attempts);
+      const exhausted = attempts >= config.documentExtractionMaxAttempts;
+      await query(
+        `UPDATE item_contents
+         SET extraction_status = $1,
+             extraction_error = $2,
+             updated_at = now()
+         WHERE item_id = $3`,
+        [
+          exhausted ? 'failed' : 'pending',
+          String(error.message).slice(0, 500),
+          item.id,
+        ],
+      );
+      failed += 1;
+      logger.error(
+        { err: error, itemId: item.id, exhausted },
+        'Failed to extract document text',
+      );
+    }
+  }
+  return { processed, failed };
+}
+
 export async function processEmailOutbox() {
   const claimed = await query(
     `UPDATE email_outbox
      SET status = 'sending', locked_at = now(), attempts = attempts + 1
      WHERE id IN (
        SELECT id FROM email_outbox
-       WHERE status = 'pending' AND next_attempt_at <= now()
+       WHERE (
+         status = 'pending' AND next_attempt_at <= now()
+       ) OR (
+         status = 'sending' AND locked_at < now() - make_interval(mins => $1)
+       )
        ORDER BY next_attempt_at
        LIMIT 20
        FOR UPDATE SKIP LOCKED
      )
      RETURNING *`,
+    [config.emailStaleLockMinutes],
   );
 
   let sent = 0;
@@ -440,9 +524,10 @@ export async function runOnce() {
   const snoozes = await processSnoozes();
   const warnings = await sendTrashWarnings();
   const purged = await purgeTrash();
+  const extractions = await processDocumentExtractions();
   const emails = await processEmailOutbox();
   const cleaned = await cleanupOldData();
-  return { reminders, snoozes, warnings, purged, emails, cleaned };
+  return { reminders, snoozes, warnings, purged, extractions, emails, cleaned };
 }
 
 function sleep(ms) {
@@ -468,7 +553,15 @@ async function main() {
     const started = Date.now();
     try {
       const result = await runOnce();
-      if (result.reminders || result.snoozes || result.warnings || result.purged || result.emails) {
+      if (
+        result.reminders ||
+        result.snoozes ||
+        result.warnings ||
+        result.purged ||
+        result.extractions.processed ||
+        result.extractions.failed ||
+        result.emails
+      ) {
         logger.info(result, 'Worker tick');
       }
     } catch (error) {

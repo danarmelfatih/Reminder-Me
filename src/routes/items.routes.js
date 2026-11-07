@@ -9,6 +9,7 @@ import { HttpError } from '../lib/errors.js';
 import { randomHex } from '../lib/tokens.js';
 import {
   itemBaseSchema,
+  itemFilterQuerySchema,
   itemUpdateSchema,
   linkItemSchema,
   parse,
@@ -17,6 +18,7 @@ import {
   snoozeSchema,
   textItemSchema,
 } from '../lib/validation.js';
+import { uuidParam } from '../middleware/params.js';
 import { cleanupFile, uploadItemFile, uploadThumbnail } from '../middleware/upload.js';
 import { toPublicUser } from '../services/auth.service.js';
 import {
@@ -44,6 +46,8 @@ import {
 } from '../services/storage.service.js';
 
 export const itemsRouter = express.Router();
+
+itemsRouter.param('id', uuidParam);
 
 const VIEWS = new Set(['all', 'favorites', 'archive', 'trash']);
 const SORTS = new Set(['priority', 'newest', 'oldest', 'updated', 'name']);
@@ -80,11 +84,17 @@ itemsRouter.get('/', async (req, res) => {
   const type = TYPES.has(req.query.type) ? req.query.type : null;
   const priority = PRIORITIES.has(req.query.priority) ? req.query.priority : null;
   const reminder = ['active', 'none'].includes(req.query.reminder) ? req.query.reminder : null;
-  const folderId = typeof req.query.folderId === 'string' ? req.query.folderId : null;
-  const tagId = typeof req.query.tagId === 'string' ? req.query.tagId : null;
+  const filters = parse(itemFilterQuerySchema, {
+    folderId: req.query.folderId,
+    tagId: req.query.tagId,
+    dateFrom: req.query.dateFrom,
+    dateTo: req.query.dateTo,
+  });
+  const folderId = filters.folderId ?? null;
+  const tagId = filters.tagId ?? null;
   const q = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 200) : '';
-  const dateFrom = typeof req.query.dateFrom === 'string' ? req.query.dateFrom : null;
-  const dateTo = typeof req.query.dateTo === 'string' ? req.query.dateTo : null;
+  const dateFrom = filters.dateFrom ?? null;
+  const dateTo = filters.dateTo ?? null;
   const pagination = parsePagination(req.query, 24, 100);
 
   const data = await listItems(
