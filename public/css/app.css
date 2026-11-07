@@ -1246,6 +1246,13 @@ button {
   padding: 30px 32px 70px;
 }
 
+[data-page="dashboard"] .page-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 30px 32px 70px;
+}
+
 .page-heading {
   display: flex;
   align-items: flex-end;
@@ -3114,9 +3121,11 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  max-width: 1200px;
+  width: 94%;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 22px 24px;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--line);
 }
 
 .public-nav {
@@ -3146,10 +3155,11 @@ button {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
   align-items: center;
-  gap: 52px;
-  max-width: 1200px;
+  gap: 64px;
+  width: 94%;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 58px 24px 88px;
+  padding: 58px 32px 88px;
 }
 
 .hero-copy h1 {
@@ -3522,9 +3532,10 @@ button {
 }
 
 .landing-section {
-  max-width: 1200px;
+  width: 94%;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 72px 24px;
+  padding: 72px 32px;
   border-top: 1px solid var(--line);
 }
 
@@ -3553,7 +3564,7 @@ button {
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 16px;
 }
 
 .feature-card {
@@ -3725,9 +3736,10 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 32px;
-  max-width: 1152px;
+  width: 94%;
+  max-width: 1600px;
   margin: 24px auto 64px;
-  padding: 40px;
+  padding: 40px 32px;
   border-radius: var(--radius-lg);
   background: var(--accent-ink);
   color: #fffaf0;

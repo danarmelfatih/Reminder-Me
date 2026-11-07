@@ -21,7 +21,7 @@
       <span>Ingat saya selama 7 hari</span>
     </label>
     <button class="btn btn-primary btn-block" type="submit" data-submit>
-      <span data-submit-label>Masuk</span>
+      <span data-submit-label>Login</span>
       <span class="spinner" data-spinner hidden aria-hidden="true"></span>
     </button>
   </form>
@@ -30,9 +30,9 @@
   <div class="auth-divider"><span>atau</span></div>
   <a class="btn btn-google btn-block" href="/api/auth/google?next=<%= encodeURIComponent(typeof next !== 'undefined' ? next : '/app') %>">
     <svg class="icon"><use href="#icon-google"></use></svg>
-    Masuk dengan Google
+    Login dengan Google
   </a>
   <% } %>
 
-  <p class="auth-switch">Belum punya akun? <a href="/register">Buat akun</a></p>
+  <p class="auth-switch">Belum punya akun? <a href="/register">Register</a></p>
 </div>
