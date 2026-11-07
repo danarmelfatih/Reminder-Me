@@ -5,20 +5,11 @@ import WordExtractor from 'word-extractor';
 import * as XLSX from 'xlsx';
 import { config } from '../config.js';
 
-const SUPPORTED = new Set([
-  'txt',
-  'pdf',
-  'doc',
-  'docx',
-  'xls',
-  'xlsx',
-  'ppt',
-  'pptx',
-]);
+const SUPPORTED = new Set(['txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']);
 
 function normalizeText(value) {
   const text = String(value ?? '')
-    .replace(/\u0000/g, '')
+    .replaceAll('\u0000', '')
     .replace(/\r\n/g, '\n')
     .trim();
   if (text.length <= config.documentExtractionMaxChars) return text;

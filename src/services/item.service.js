@@ -274,8 +274,9 @@ export async function listItems(userId, filters = {}, pagination = { page: 1, pe
   };
 }
 
-export async function getItem(userId, itemId) {
-  const result = await query(
+export async function getItem(userId, itemId, client = null) {
+  const runner = client ?? { query };
+  const result = await runner.query(
     `${ITEM_SELECT}
      WHERE i.id = $1 AND i.user_id = $2
      GROUP BY i.id, f.name, r.id`,
@@ -546,7 +547,7 @@ export async function restoreItem(userId, itemId) {
        WHERE item_id = $1 AND status = 'pending'`,
       [itemId],
     );
-    return getItem(userId, itemId);
+    return getItem(userId, itemId, client);
   });
 }
 

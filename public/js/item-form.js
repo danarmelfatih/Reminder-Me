@@ -1,4 +1,5 @@
 import { api, errorMessage } from './api.js';
+import { createReminderControls } from './reminder.js';
 import {
   clearFormError,
   debounce,
@@ -12,7 +13,6 @@ import {
 } from './ui.js';
 
 const app = document.getElementById('item-form-app');
-if (app) init();
 
 const mode = app?.dataset.mode ?? 'create';
 const itemId = app?.dataset.itemId ?? '';
@@ -41,12 +41,15 @@ const elements = {
   tagPicker: app?.querySelector('[data-tag-picker]'),
   existingFile: app?.querySelector('[data-existing-file]'),
   editTypeLabel: app?.querySelector('[data-edit-type-label]'),
+  reminderToggle: app?.querySelector('[data-reminder-toggle]'),
+  reminderControls: app?.querySelector('[data-reminder-controls]'),
   submit: form?.querySelector('[data-submit]'),
   cancel: app?.querySelector('[data-cancel-link]'),
 };
 
 let type = mode === 'create' ? app.dataset.initialType || 'link' : 'link';
 let currentItem = null;
+let reminder = null;
 let metadata = null;
 let metadataUrl = null;
 let metadataRequest = 0;
@@ -60,9 +63,38 @@ let thumbnailObjectUrl = null;
 function init() {
   bindEvents();
   setType(type);
-  if (mode === 'edit') loadItem();
-  else loadOptions();
+  setupReminder();
+  if (mode === 'edit') {
+    loadItem();
+  } else {
+    loadOptions();
+    loadUserTimezone();
+  }
   updateDescriptionCount();
+}
+
+function setupReminder() {
+  if (mode !== 'create' || !elements.reminderToggle || !elements.reminderControls) return;
+  reminder = createReminderControls({ timezone: 'Asia/Jakarta' });
+  elements.reminderControls.append(reminder.node);
+  elements.reminderToggle.addEventListener('change', () => {
+    elements.reminderControls.hidden = !elements.reminderToggle.checked;
+  });
+}
+
+async function loadUserTimezone() {
+  try {
+    const data = await api('/api/me');
+    if (data?.user?.timezone && reminder) {
+      reminder.timezoneInput.value = data.user.timezone;
+    }
+  } catch {
+    return;
+  }
+}
+
+function reminderEnabled() {
+  return mode === 'create' && Boolean(elements.reminderToggle?.checked);
 }
 
 function bindEvents() {
@@ -499,6 +531,15 @@ async function submitForm() {
     }
   }
 
+  if (reminderEnabled()) {
+    try {
+      reminder.validate();
+    } catch (error) {
+      showFormError(form, errorMessage(error));
+      return;
+    }
+  }
+
   setLoading(elements.submit, true);
   try {
     const payload = basePayload();
@@ -573,10 +614,26 @@ async function submitForm() {
     } else {
       toast(result?.message ?? 'Item disimpan.');
     }
-    window.location.assign(`/app/items/${result.item.id}?created=1`);
+
+    let reminderFailed = false;
+    if (reminderEnabled()) {
+      try {
+        await api(`/api/items/${result.item.id}/reminder`, {
+          method: 'PUT',
+          body: reminder.getPayload(),
+        });
+      } catch (error) {
+        reminderFailed = true;
+        toast(`Item tersimpan, tetapi pengingat gagal: ${errorMessage(error)}`, 'error');
+      }
+    }
+    const query = reminderFailed ? '?created=1&reminder=failed' : '?created=1';
+    window.location.assign(`/app/items/${result.item.id}${query}`);
   } catch (error) {
     showFormError(form, errorMessage(error));
   } finally {
     setLoading(elements.submit, false);
   }
 }
+
+if (app) init();

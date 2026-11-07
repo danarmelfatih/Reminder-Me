@@ -14,7 +14,7 @@
     "db:seed": "bun run scripts/seed.js",
     "admin:create": "bun run scripts/admin.js",
     "storage:reconcile": "bun run scripts/reconcile.js",
-    "test": "bun test",
+    "test": "bun run scripts/test.js",
     "lint": "biome check .",
     "format": "biome check --write ."
   },

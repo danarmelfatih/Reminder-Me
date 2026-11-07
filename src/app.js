@@ -7,7 +7,13 @@ import { pinoHttp } from 'pino-http';
 import { config } from './config.js';
 import { query } from './db/pool.js';
 import { logger } from './lib/logger.js';
-import { attachUserLocals, loadUser, requireAdmin, requireAuth } from './middleware/auth.js';
+import {
+  attachUserLocals,
+  loadUser,
+  requireAdmin,
+  requireAuth,
+  requireVerified,
+} from './middleware/auth.js';
 import { ensureCsrf, verifyCsrf } from './middleware/csrf.js';
 import { errorHandler, notFoundHandler } from './middleware/errors.js';
 import { readFlash } from './middleware/flash.js';
@@ -106,16 +112,16 @@ export function createApp() {
 
   app.use('/api', apiLimiter);
   app.use('/api/auth', authRouter);
-  app.use('/api/me', requireAuth, meRouter);
-  app.use('/api/dashboard', requireAuth, dashboardRouter);
-  app.use('/api/items', requireAuth, itemsRouter);
-  app.use('/api/folders', requireAuth, foldersRouter);
-  app.use('/api/tags', requireAuth, tagsRouter);
-  app.use('/api/notifications', requireAuth, notificationsRouter);
-  app.use('/api/export', requireAuth, exportLimiter, exportRouter);
-  app.use('/api/metadata', requireAuth, metadataRouter);
-  app.use('/api/admin', requireAdmin, adminRouter);
-  app.use('/admin', requireAdmin);
+  app.use('/api/me', requireAuth, requireVerified, meRouter);
+  app.use('/api/dashboard', requireAuth, requireVerified, dashboardRouter);
+  app.use('/api/items', requireAuth, requireVerified, itemsRouter);
+  app.use('/api/folders', requireAuth, requireVerified, foldersRouter);
+  app.use('/api/tags', requireAuth, requireVerified, tagsRouter);
+  app.use('/api/notifications', requireAuth, requireVerified, notificationsRouter);
+  app.use('/api/export', requireAuth, requireVerified, exportLimiter, exportRouter);
+  app.use('/api/metadata', requireAuth, requireVerified, metadataRouter);
+  app.use('/api/admin', requireAdmin, requireVerified, adminRouter);
+  app.use('/admin', requireAdmin, requireVerified);
   app.use('/', pagesRouter);
 
   app.use(notFoundHandler);

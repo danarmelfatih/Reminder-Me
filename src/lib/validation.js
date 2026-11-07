@@ -191,6 +191,10 @@ export const adminUserQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 });
 
+export const adminStatsQuerySchema = z.object({
+  period: z.enum(['7', '30', '90']).default('7').transform(Number),
+});
+
 export function parse(schema, data) {
   const result = schema.safeParse(data);
   if (!result.success) {

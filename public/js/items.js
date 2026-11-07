@@ -16,7 +16,6 @@ import {
 } from './ui.js';
 
 const app = document.getElementById('items-app');
-if (app) init();
 
 const PAGE_SIZE = 24;
 const FILTER_KEYS = ['type', 'priority', 'folderId', 'tagId', 'reminder', 'dateFrom', 'dateTo'];
@@ -420,3 +419,5 @@ function syncUrl() {
   const suffix = query.toString();
   window.history.replaceState(null, '', `${window.location.pathname}${suffix ? `?${suffix}` : ''}`);
 }
+
+if (app) init();

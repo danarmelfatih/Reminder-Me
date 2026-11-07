@@ -4,6 +4,7 @@ node_modules/
 storage/*
 !storage/.gitkeep
 storage/.gitkeep
+storage-test/
 *.log
 .pgdata/
 coverage/

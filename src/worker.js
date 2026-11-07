@@ -384,10 +384,9 @@ export async function processDocumentExtractions() {
   let processed = 0;
   let failed = 0;
   for (const content of claimed.rows) {
-    const itemResult = await query(
-      'SELECT id, file_path, file_ext FROM items WHERE id = $1',
-      [content.item_id],
-    );
+    const itemResult = await query('SELECT id, file_path, file_ext FROM items WHERE id = $1', [
+      content.item_id,
+    ]);
     const item = itemResult.rows[0];
     if (!item) continue;
 
@@ -416,17 +415,10 @@ export async function processDocumentExtractions() {
              extraction_error = $2,
              updated_at = now()
          WHERE item_id = $3`,
-        [
-          exhausted ? 'failed' : 'pending',
-          String(error.message).slice(0, 500),
-          item.id,
-        ],
+        [exhausted ? 'failed' : 'pending', String(error.message).slice(0, 500), item.id],
       );
       failed += 1;
-      logger.error(
-        { err: error, itemId: item.id, exhausted },
-        'Failed to extract document text',
-      );
+      logger.error({ err: error, itemId: item.id, exhausted }, 'Failed to extract document text');
     }
   }
   return { processed, failed };

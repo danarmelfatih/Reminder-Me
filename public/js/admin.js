@@ -23,22 +23,32 @@ if (page === 'admin-users') initUsers();
 if (page === 'admin-user-detail') initUserDetail();
 
 async function initDashboard() {
-  try {
-    const data = await api('/api/admin/stats');
-    setStat('totalUsers', data.users?.total ?? 0);
-    setStat('activeUsers', data.users?.active ?? 0);
-    setStat('disabledUsers', data.users?.disabled ?? 0);
-    setStat('totalStorage', formatBytes(data.storage?.totalUsedBytes ?? 0));
+  const periodSelect = document.querySelector('[data-admin-period]');
 
-    const newUsers = document.querySelector('[data-admin-note="newUsers"]');
-    if (newUsers) newUsers.textContent = `${data.users?.newLast7Days ?? 0} baru dalam 7 hari`;
+  const load = async () => {
+    try {
+      const period = periodSelect?.value ?? '7';
+      const data = await api(`/api/admin/stats?period=${encodeURIComponent(period)}`);
+      setStat('totalUsers', data.users?.total ?? 0);
+      setStat('activeUsers', data.users?.active ?? 0);
+      setStat('disabledUsers', data.users?.disabled ?? 0);
+      setStat('totalStorage', formatBytes(data.storage?.totalUsedBytes ?? 0));
 
-    renderSystem(data.system ?? []);
-    renderSummary(data);
-    renderEmail(data.email ?? {});
-  } catch (error) {
-    toast(errorMessage(error), 'error');
-  }
+      const newUsers = document.querySelector('[data-admin-note="newUsers"]');
+      if (newUsers) {
+        newUsers.textContent = `${data.users?.newInPeriod ?? 0} baru dalam ${data.users?.periodDays ?? period} hari`;
+      }
+
+      renderSystem(data.system ?? []);
+      renderSummary(data);
+      renderEmail(data.email ?? {});
+    } catch (error) {
+      toast(errorMessage(error), 'error');
+    }
+  };
+
+  periodSelect?.addEventListener('change', load);
+  await load();
 }
 
 function setStat(key, value) {
@@ -55,16 +65,25 @@ function renderSystem(system) {
     return;
   }
   for (const entry of system) {
-    const ok = entry.status === 'ok';
+    const statusClass =
+      entry.status === 'ok' ? '' : entry.status === 'degraded' ? ' is-degraded' : ' is-down';
+    let meta;
+    if (entry.name === 'storage' && entry.totalBytes != null) {
+      meta = `${formatBytes(entry.freeBytes)} tersedia dari ${formatBytes(entry.totalBytes)}`;
+    } else if (entry.detail) {
+      meta = entry.detail;
+    } else if (entry.lastSeenAt) {
+      meta = formatDateTime(entry.lastSeenAt);
+    } else {
+      meta = 'Tidak diketahui';
+    }
     container.append(
       h(
         'div',
         { class: 'system-row' },
-        h('span', { class: `system-status${ok ? '' : ' is-down'}` }),
+        h('span', { class: `system-status${statusClass}` }),
         h('strong', { text: entry.label ?? entry.name }),
-        h('span', {
-          text: entry.lastSeenAt ? formatDateTime(entry.lastSeenAt) : 'Tidak diketahui',
-        }),
+        h('span', { text: meta }),
       ),
     );
   }

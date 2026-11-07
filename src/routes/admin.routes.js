@@ -4,7 +4,12 @@ import express from 'express';
 import { config } from '../config.js';
 import { query, withTransaction } from '../db/pool.js';
 import { HttpError } from '../lib/errors.js';
-import { adminQuotaSchema, adminUserQuerySchema, parse } from '../lib/validation.js';
+import {
+  adminQuotaSchema,
+  adminStatsQuerySchema,
+  adminUserQuerySchema,
+  parse,
+} from '../lib/validation.js';
 import { uuidParam } from '../middleware/params.js';
 import { findUserById } from '../services/auth.service.js';
 
@@ -36,6 +41,55 @@ function safeUser(row) {
   };
 }
 
+async function readStorageStatus() {
+  try {
+    const stats = await fs.promises.statfs(config.storageDir);
+    const totalBytes = stats.blocks * stats.bsize;
+    const freeBytes = stats.bavail * stats.bsize;
+    const usedPercent = totalBytes > 0 ? ((totalBytes - freeBytes) / totalBytes) * 100 : 0;
+    return {
+      name: 'storage',
+      label: 'Ruang penyimpanan',
+      status: usedPercent >= 95 ? 'down' : usedPercent >= 80 ? 'degraded' : 'ok',
+      totalBytes,
+      freeBytes,
+    };
+  } catch {
+    return {
+      name: 'storage',
+      label: 'Ruang penyimpanan',
+      status: 'down',
+      totalBytes: null,
+      freeBytes: null,
+    };
+  }
+}
+
+function readEmailStatus() {
+  if (config.mailDriver === 'console') {
+    return {
+      name: 'email',
+      label: 'Layanan email',
+      status: 'degraded',
+      detail: 'Driver console: email hanya dicatat ke log',
+    };
+  }
+  if (!config.resendApiKey) {
+    return {
+      name: 'email',
+      label: 'Layanan email',
+      status: 'down',
+      detail: 'RESEND_API_KEY belum diatur',
+    };
+  }
+  return {
+    name: 'email',
+    label: 'Layanan email',
+    status: 'ok',
+    detail: `Resend · ${config.mailFrom}`,
+  };
+}
+
 async function audit(adminId, action, targetUserId, details, req) {
   await query(
     `INSERT INTO admin_audit_logs (admin_id, action, target_user_id, details, ip)
@@ -45,49 +99,64 @@ async function audit(adminId, action, targetUserId, details, req) {
 }
 
 adminRouter.get('/stats', async (req, res) => {
-  const [users, storage, items, folders, tags, reminders, notifications, email, heartbeats] =
-    await Promise.all([
-      query(
-        `SELECT count(*)::int AS total,
+  const data = parse(adminStatsQuerySchema, req.query);
+  const [
+    users,
+    storage,
+    items,
+    folders,
+    tags,
+    reminders,
+    notifications,
+    email,
+    heartbeats,
+    disk,
+    emailService,
+  ] = await Promise.all([
+    query(
+      `SELECT count(*)::int AS total,
                 count(*) FILTER (WHERE status = 'active')::int AS active,
                 count(*) FILTER (WHERE status = 'disabled')::int AS disabled,
-                count(*) FILTER (WHERE created_at >= now() - interval '7 days')::int AS new_last_7_days
+                count(*) FILTER (WHERE created_at >= now() - make_interval(days => $1))::int AS new_in_period
          FROM users`,
-      ),
-      query(
-        `SELECT coalesce(sum(storage_used_bytes), 0)::bigint AS total_used_bytes,
+      [data.period],
+    ),
+    query(
+      `SELECT coalesce(sum(storage_used_bytes), 0)::bigint AS total_used_bytes,
                 coalesce(sum(storage_quota_bytes), 0)::bigint AS total_quota_bytes
          FROM users`,
-      ),
-      query(
-        `SELECT count(*)::int AS total,
+    ),
+    query(
+      `SELECT count(*)::int AS total,
                 count(*) FILTER (WHERE deleted_at IS NULL AND is_archived = false)::int AS active,
                 count(*) FILTER (WHERE deleted_at IS NULL AND is_archived = true)::int AS archived,
                 count(*) FILTER (WHERE deleted_at IS NOT NULL)::int AS trash
          FROM items`,
-      ),
-      query('SELECT count(*)::int AS count FROM folders'),
-      query('SELECT count(*)::int AS count FROM tags'),
-      query(
-        `SELECT count(*)::int AS total,
+    ),
+    query('SELECT count(*)::int AS count FROM folders'),
+    query('SELECT count(*)::int AS count FROM tags'),
+    query(
+      `SELECT count(*)::int AS total,
                 count(*) FILTER (WHERE is_active = true)::int AS active
          FROM reminders`,
-      ),
-      query(
-        `SELECT count(*)::int AS total,
+    ),
+    query(
+      `SELECT count(*)::int AS total,
                 count(*) FILTER (WHERE is_read = false)::int AS unread
          FROM notifications`,
-      ),
-      query(
-        `SELECT count(*) FILTER (WHERE status = 'pending')::int AS pending,
+    ),
+    query(
+      `SELECT count(*) FILTER (WHERE status = 'pending')::int AS pending,
                 count(*) FILTER (WHERE status = 'sending')::int AS sending,
                 count(*) FILTER (WHERE status = 'sent')::int AS sent,
                 count(*) FILTER (WHERE status = 'failed')::int AS failed,
                 count(*) FILTER (WHERE status = 'sent' AND sent_at >= now() - interval '24 hours')::int AS last_24h
          FROM email_outbox`,
-      ),
-      query('SELECT name, last_seen_at FROM system_heartbeats'),
-    ]);
+    ),
+    query('SELECT name, last_seen_at FROM system_heartbeats'),
+    readStorageStatus(),
+    readEmailStatus(),
+  ]);
 
   const heartbeatMap = new Map(heartbeats.rows.map((row) => [row.name, row.last_seen_at]));
   const now = Date.now();
@@ -101,7 +170,8 @@ adminRouter.get('/stats', async (req, res) => {
       total: users.rows[0].total,
       active: users.rows[0].active,
       disabled: users.rows[0].disabled,
-      newLast7Days: users.rows[0].new_last_7_days,
+      newInPeriod: users.rows[0].new_in_period,
+      periodDays: data.period,
     },
     storage: {
       totalUsedBytes: Number(storage.rows[0].total_used_bytes),
@@ -126,6 +196,8 @@ adminRouter.get('/stats', async (req, res) => {
         status: 'ok',
         lastSeenAt: new Date().toISOString(),
       },
+      disk,
+      emailService,
       {
         name: 'worker',
         label: 'Worker pengingat & email',

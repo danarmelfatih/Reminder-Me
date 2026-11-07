@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
+import * as XLSX from 'xlsx';
 import { escapeHtml, formatBytes, initials, safeHttpUrl } from '../src/lib/format.js';
 import { safeRedirectPath } from '../src/lib/redirect.js';
 import { sha256, timingSafeEqualString } from '../src/lib/tokens.js';
@@ -14,7 +15,6 @@ import {
   passwordSchema,
   uuidSchema,
 } from '../src/lib/validation.js';
-import * as XLSX from 'xlsx';
 import {
   extractDocumentText,
   supportedDocumentExtension,

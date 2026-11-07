@@ -133,8 +133,15 @@
     <section class="form-section reminder-form-section">
       <div class="form-section-head">
         <h2>Pengingat</h2>
-        <p>Opsional. Anda dapat mengaturnya sekarang atau setelah item tersimpan.</p>
+        <p>Opsional. Atur sekarang atau setelah item tersimpan.</p>
       </div>
+      <% if (mode === 'create') { %>
+      <label class="checkbox-row">
+        <input type="checkbox" name="enableReminder" value="1" data-reminder-toggle>
+        <span>Aktifkan pengingat untuk item ini</span>
+      </label>
+      <div class="reminder-form-controls" data-reminder-controls hidden></div>
+      <% } else { %>
       <div class="reminder-form-placeholder" data-reminder-placeholder>
         <span class="reminder-form-icon"><svg class="icon"><use href="#icon-bell"></use></svg></span>
         <div>
@@ -143,6 +150,7 @@
         </div>
         <a class="btn btn-ghost btn-sm" href="/app/items" data-reminder-placeholder-link>Lihat item</a>
       </div>
+      <% } %>
     </section>
 
     <div class="form-actions">

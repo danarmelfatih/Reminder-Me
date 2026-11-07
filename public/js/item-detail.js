@@ -1,4 +1,5 @@
 import { api, errorMessage } from './api.js';
+import { createReminderControls } from './reminder.js';
 import {
   confirmDialog,
   formatBytes,
@@ -10,12 +11,10 @@ import {
   priorityLabel,
   timeAgo,
   toast,
-  toDateTimeLocalValue,
   typeLabel,
 } from './ui.js';
 
 const app = document.getElementById('item-detail-app');
-if (app) init();
 
 const itemId = app?.dataset.itemId;
 let item = null;
@@ -446,106 +445,16 @@ async function deleteReminder() {
 function openReminderModal() {
   const reminder = item.reminder;
   const timezone = reminder?.timezone || user?.timezone || 'Asia/Jakarta';
-
-  const typeSelect = h(
-    'select',
-    { name: 'type' },
-    h('option', { value: 'once', text: 'Sekali' }),
-    h('option', { value: 'recurring', text: 'Berulang' }),
-  );
-  typeSelect.value = reminder?.type ?? 'once';
-
-  const startInput = h('input', {
-    type: 'datetime-local',
-    name: 'startAt',
-    required: true,
-    value: toDateTimeLocalValue(reminder?.nextRunAt ?? new Date(Date.now() + 3600000), timezone),
-  });
-
-  const timezoneInput = h('input', {
-    type: 'text',
-    name: 'timezone',
-    value: timezone,
-    maxlength: 64,
-    required: true,
-  });
-
-  const frequencySelect = h(
-    'select',
-    { name: 'frequency' },
-    h('option', { value: 'daily', text: 'Harian' }),
-    h('option', { value: 'weekly', text: 'Mingguan' }),
-    h('option', { value: 'monthly', text: 'Bulanan' }),
-    h('option', { value: 'yearly', text: 'Tahunan' }),
-  );
-  const intervalInput = h('input', { type: 'number', name: 'interval', min: 1, max: 99, value: 1 });
-  const repeatUntilInput = h('input', { type: 'datetime-local', name: 'repeatUntil' });
-
-  const weekdayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-  const weekdayInputs = weekdayLabels.map((label, index) => {
-    const input = h('input', { type: 'checkbox', value: String(index) });
-    return {
-      input,
-      node: h('label', { class: 'checkbox-row' }, input, h('span', { text: label })),
-    };
-  });
-
-  if (reminder?.recurrence) {
-    frequencySelect.value = reminder.recurrence.frequency;
-    intervalInput.value = String(reminder.recurrence.interval ?? 1);
-    const selectedWeekdays = new Set(reminder.recurrence.weekdays ?? []);
-    for (const [index, entry] of weekdayInputs.entries()) {
-      entry.input.checked = selectedWeekdays.has(index);
-    }
-    if (reminder.recurrence.repeatUntil) {
-      repeatUntilInput.value = toDateTimeLocalValue(reminder.recurrence.repeatUntil, timezone);
-    }
-  }
-
-  const recurringFields = h(
-    'div',
-    { class: 'form-stack' },
-    h(
-      'div',
-      { class: 'form-row' },
-      h('div', { class: 'field' }, h('label', { text: 'Frekuensi' }), frequencySelect),
-      h('div', { class: 'field' }, h('label', { text: 'Setiap' }), intervalInput),
-    ),
-    h(
-      'div',
-      { class: 'field' },
-      h('label', { text: 'Hari (untuk mingguan)' }),
-      h(
-        'div',
-        { class: 'form-row' },
-        weekdayInputs.map((entry) => entry.node),
-      ),
-    ),
-    h(
-      'div',
-      { class: 'field' },
-      h('label', { text: 'Berulang sampai (opsional)' }),
-      repeatUntilInput,
-    ),
-  );
-
-  const updateVisibility = () => {
-    recurringFields.hidden = typeSelect.value !== 'recurring';
-  };
-  typeSelect.addEventListener('change', updateVisibility);
-  updateVisibility();
+  const controls = createReminderControls({ timezone, reminder });
 
   const body = h(
     'div',
     { class: 'form-stack' },
     h('div', { class: 'form-error', 'data-form-error': '', hidden: true }),
-    h('div', { class: 'field' }, h('label', { text: 'Jenis pengingat' }), typeSelect),
-    h('div', { class: 'field' }, h('label', { text: 'Tanggal dan waktu' }), startInput),
-    h('div', { class: 'field' }, h('label', { text: 'Zona waktu' }), timezoneInput),
-    recurringFields,
+    controls.node,
   );
 
-  const modal = openModal({
+  return openModal({
     title: reminder ? 'Ubah pengingat' : 'Atur pengingat',
     description: 'Pengingat dikirim di aplikasi dan melalui email.',
     body,
@@ -558,31 +467,10 @@ function openReminderModal() {
           const errorBox = body.querySelector('[data-form-error]');
           errorBox.hidden = true;
           try {
-            const payload = {
-              type: typeSelect.value,
-              startAt: zonedTimeToUtc(startInput.value, timezoneInput.value.trim()),
-              timezone: timezoneInput.value.trim(),
-              recurrence:
-                typeSelect.value === 'recurring'
-                  ? {
-                      frequency: frequencySelect.value,
-                      interval: Math.max(1, Number(intervalInput.value) || 1),
-                      weekdays:
-                        frequencySelect.value === 'weekly'
-                          ? weekdayInputs
-                              .filter((entry) => entry.input.checked)
-                              .map((entry) => Number(entry.input.value))
-                          : undefined,
-                      repeatUntil: repeatUntilInput.value
-                        ? zonedTimeToUtc(repeatUntilInput.value, timezoneInput.value.trim())
-                        : null,
-                    }
-                  : null,
-            };
-            if (!startInput.value) throw new Error('Tanggal dan waktu wajib diisi.');
+            controls.validate();
             const result = await api(`/api/items/${item.id}/reminder`, {
               method: 'PUT',
-              body: payload,
+              body: controls.getPayload(),
             });
             toast(result?.message ?? 'Pengingat disimpan.');
             close();
@@ -596,51 +484,22 @@ function openReminderModal() {
       },
     ],
   });
-
-  return modal;
-}
-
-function zonedTimeToUtc(localValue, timeZone) {
-  if (!localValue) return '';
-  const [datePart, timePart] = localValue.split('T');
-  if (!datePart || !timePart) return new Date(localValue).toISOString();
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hour, minute] = timePart.split(':').map(Number);
-  const utcGuess = Date.UTC(year, month - 1, day, hour, minute);
-  try {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-    const parts = Object.fromEntries(
-      formatter.formatToParts(new Date(utcGuess)).map((part) => [part.type, part.value]),
-    );
-    const asUtc = Date.UTC(
-      Number(parts.year),
-      Number(parts.month) - 1,
-      Number(parts.day),
-      Number(parts.hour) % 24,
-      Number(parts.minute),
-    );
-    return new Date(utcGuess - (asUtc - utcGuess)).toISOString();
-  } catch {
-    return new Date(localValue).toISOString();
-  }
 }
 
 function handleQueryToast() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('created')) toast('Item berhasil disimpan.');
   if (params.get('updated')) toast('Item berhasil diperbarui.');
-  if (params.has('created') || params.has('updated')) {
+  if (params.get('reminder') === 'failed') {
+    toast('Item tersimpan, tetapi pengingat gagal disimpan.', 'error');
+  }
+  if (params.has('created') || params.has('updated') || params.has('reminder')) {
     params.delete('created');
     params.delete('updated');
+    params.delete('reminder');
     const query = params.toString();
     window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
   }
 }
+
+if (app) init();
