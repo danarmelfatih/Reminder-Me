@@ -8,6 +8,15 @@
   <title><%= title %> · Reminder Me</title>
   <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/app.css">
+  <script>
+    (function(){
+      const key='reminder_theme';
+      const stored=localStorage.getItem(key);
+      const dark=stored==='dark'||(!stored&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if(dark)document.documentElement.dataset.theme='dark';
+    })();
+  </script>
+  <script type="module" src="/js/theme.js"></script>
 </head>
 <body class="auth-body" data-page="<%= pageId || '' %>" data-authed="false" data-next="<%= typeof next !== 'undefined' ? next : '/app' %>">
   <%- include('../partials/icon-sprite') %>

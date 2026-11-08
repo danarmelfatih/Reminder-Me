@@ -49,7 +49,7 @@ export function createApp() {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
           styleSrc: ["'self'"],
           imgSrc: ["'self'", 'data:'],
           fontSrc: ["'self'"],

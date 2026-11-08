@@ -37,6 +37,151 @@
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Times New Roman", serif;
 }
 
+[data-theme="dark"] {
+  --bg: #100E0C;
+  --bg-deep: #0a0807;
+  --surface: #1A1713;
+  --surface-2: #211D18;
+  --surface-3: #23201c;
+  --ink: #F3EFE8;
+  --ink-soft: #A69D90;
+  --muted: #81796E;
+  --muted-2: #7c7468;
+  --line: #302B24;
+  --line-strong: #3d3932;
+  --accent: #50B88D;
+  --accent-dark: #3DA77D;
+  --accent-soft: #2d4a3d;
+  --accent-ink: #8fd6a8;
+  --amber: #e2b06e;
+  --amber-soft: #3e2a10;
+  --red: #e88a7f;
+  --red-soft: #3d1a15;
+  --blue: #7fa8c8;
+  --blue-soft: #1d2a33;
+  --violet: #b59fd2;
+  --violet-soft: #2d2733;
+  --green: #7fb06f;
+  --green-soft: #20301b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 30px -18px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 60px -30px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode component overrides (light mode is unchanged) */
+[data-theme="dark"] .sidebar {
+  background: #171410;
+}
+
+[data-theme="dark"] .topbar {
+  border-bottom-color: rgba(48, 43, 36, 0.8);
+  background: rgba(23, 20, 16, 0.9);
+}
+
+[data-theme="dark"] .topbar-search input {
+  background: rgba(22, 20, 17, 0.8);
+}
+
+[data-theme="dark"] .search-kbd {
+  background: var(--surface-2);
+}
+
+[data-theme="dark"] .auth-aside {
+  background: #100E0C;
+}
+
+[data-theme="dark"] .auth-aside::after {
+  border-color: rgba(255, 250, 240, 0.06);
+}
+
+[data-theme="dark"] .auth-point-icon {
+  background: rgba(255, 250, 240, 0.04);
+  border-color: rgba(255, 250, 240, 0.06);
+}
+
+[data-theme="dark"] .landing-cta {
+  background: #13453a;
+}
+
+[data-theme="dark"] .mock-sidebar {
+  background: #171410;
+}
+
+[data-theme="dark"] .mock-card-featured {
+  background: #1A1713;
+  border-color: #302B24;
+}
+
+[data-theme="dark"] .btn-light {
+  background: #211D18;
+  border-color: #302B24;
+  color: var(--ink-soft);
+}
+
+[data-theme="dark"] .btn-light:hover {
+  background: #302B24;
+}
+
+[data-theme="dark"] .field input,
+[data-theme="dark"] .field select,
+[data-theme="dark"] .field textarea,
+[data-theme="dark"] .list-search input,
+[data-theme="dark"] .select-inline select {
+  background: var(--surface);
+}
+
+[data-theme="dark"] .tag-picker {
+  background: var(--surface);
+}
+
+[data-theme="dark"] :focus-visible {
+  outline-color: rgba(80, 184, 141, 0.35);
+}
+
+[data-theme="dark"] .segmented input:focus-visible + span,
+[data-theme="dark"] .tag-choice input:focus-visible + span {
+  outline-color: rgba(80, 184, 141, 0.35);
+}
+
+[data-theme="dark"] .text-link {
+  text-decoration-color: rgba(80, 184, 141, 0.25);
+}
+
+[data-theme="dark"] .empty-state {
+  background: rgba(22, 20, 17, 0.55);
+}
+
+[data-theme="dark"] .notification-item.is-unread {
+  background: rgba(80, 184, 141, 0.15);
+}
+
+[data-theme="dark"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(33, 29, 24, 0.7), transparent);
+}
+
+[data-theme="dark"] .spinner {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+}
+
+/* Sidebar dark mode contrast fixes */
+[data-theme="dark"] .nav-label {
+  color: var(--ink-soft);
+}
+
+[data-theme="dark"] .nav-count {
+  color: var(--ink-soft);
+}
+
+[data-theme="dark"] .storage-widget-text,
+[data-theme="dark"] .storage-widget-text strong {
+  color: var(--ink-soft);
+}
+
+[data-theme="dark"] .user-chip-copy span {
+  color: var(--ink-soft);
+}
+
 *,
 *::before,
 *::after {
@@ -325,6 +470,21 @@ button {
 .icon-btn .icon {
   width: 21px;
   height: 21px;
+}
+
+.theme-toggle [data-theme-icon] {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+.theme-toggle [data-theme-icon="moon"] {
+  display: none;
+}
+[data-theme="dark"] .theme-toggle [data-theme-icon="moon"] {
+  display: inline-flex;
+}
+[data-theme="dark"] .theme-toggle [data-theme-icon="sun"] {
+  display: none;
 }
 
 .spinner {
