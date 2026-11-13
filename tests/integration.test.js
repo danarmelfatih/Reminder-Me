@@ -141,6 +141,32 @@ describeDb('integration', () => {
     expect(await getSessionUser(raw)).toBeNull();
   });
 
+  test('auth: forgot-password creates a reset token for an active user', async () => {
+    const user = await makeUser('forgot@example.com');
+    const jar = createCookieJar();
+    const health = await fetch(`${baseUrl}/api/health`);
+    jar.absorb(health);
+
+    const response = await fetch(`${baseUrl}/api/auth/forgot-password`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        cookie: jar.header(),
+        'x-csrf-token': jar.get(config.csrfCookieName),
+      },
+      body: JSON.stringify({ email: user.email }),
+    });
+    expect(response.status).toBe(200);
+    expect((await response.json()).message).toContain('tautan pengaturan ulang password');
+
+    const tokens = await query(
+      `SELECT count(*)::int AS count FROM auth_tokens
+       WHERE user_id = $1 AND type = 'password_reset' AND used_at IS NULL`,
+      [user.id],
+    );
+    expect(tokens.rows[0].count).toBe(1);
+  });
+
   test('ownership: user B cannot read or mutate user A data', async () => {
     const alice = await makeUser('alice@example.com');
     const bob = await makeUser('bob@example.com');

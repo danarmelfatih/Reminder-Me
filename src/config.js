@@ -6,38 +6,61 @@ const boolish = z
   .union([z.boolean(), z.string()])
   .transform((value) => value === true || value === 'true' || value === '1');
 
-const schema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().default(3004),
-  APP_URL: z.string().url().default('http://localhost:3004'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL wajib diisi'),
-  COOKIE_SECURE: boolish.default(false),
-  TRUST_PROXY: z.coerce.number().int().min(0).default(0),
+const schema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    PORT: z.coerce.number().int().positive().default(3004),
+    APP_URL: z.string().url().default('http://localhost:3004'),
+    DATABASE_URL: z.string().min(1, 'DATABASE_URL wajib diisi'),
+    COOKIE_SECURE: boolish.default(false),
+    TRUST_PROXY: z.coerce.number().int().min(0).default(0),
 
-  STORAGE_DIR: z.string().default('./storage'),
-  DEFAULT_STORAGE_QUOTA_BYTES: z.coerce.number().int().positive().default(1073741824),
-  DEFAULT_FOLDER_LIMIT: z.coerce.number().int().positive().default(50),
-  DEFAULT_TAG_LIMIT: z.coerce.number().int().positive().default(100),
-  STORAGE_WARN_PERCENT: z.coerce.number().int().min(1).max(100).default(80),
-  STORAGE_CRITICAL_PERCENT: z.coerce.number().int().min(1).max(100).default(95),
+    STORAGE_DIR: z.string().default('./storage'),
+    DEFAULT_STORAGE_QUOTA_BYTES: z.coerce.number().int().positive().default(1073741824),
+    DEFAULT_FOLDER_LIMIT: z.coerce.number().int().positive().default(50),
+    DEFAULT_TAG_LIMIT: z.coerce.number().int().positive().default(100),
+    STORAGE_WARN_PERCENT: z.coerce.number().int().min(1).max(100).default(80),
+    STORAGE_CRITICAL_PERCENT: z.coerce.number().int().min(1).max(100).default(95),
 
-  MAIL_DRIVER: z.enum(['console', 'resend']).default('console'),
-  RESEND_API_KEY: z.string().optional().default(''),
-  MAIL_FROM: z.string().default('Reminder Me <onboarding@resend.dev>'),
+    MAIL_DRIVER: z.enum(['console', 'resend', 'smtp']).default('console'),
+    RESEND_API_KEY: z.string().optional().default(''),
+    MAIL_FROM: z.string().default('Reminder Me <onboarding@resend.dev>'),
+    SMTP_HOST: z.string().optional().default(''),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
+    SMTP_SECURE: boolish.default(false),
+    SMTP_USER: z.string().optional().default(''),
+    SMTP_PASS: z.string().optional().default(''),
+    SMTP_FROM: z.string().optional().default(''),
 
-  GOOGLE_CLIENT_ID: z.string().optional().default(''),
-  GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
-  GOOGLE_REDIRECT_URI: z.string().optional().default(''),
+    GOOGLE_CLIENT_ID: z.string().optional().default(''),
+    GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
+    GOOGLE_REDIRECT_URI: z.string().optional().default(''),
 
-  WORKER_POLL_MS: z.coerce.number().int().min(1000).default(15000),
-  EMAIL_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
-  EMAIL_STALE_LOCK_MINUTES: z.coerce.number().int().min(1).default(15),
-  NOTIFICATION_RETENTION_DAYS: z.coerce.number().int().min(1).default(90),
-  DOCUMENT_EXTRACTION_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(3),
-  DOCUMENT_EXTRACTION_STALE_MINUTES: z.coerce.number().int().min(1).default(15),
-  DOCUMENT_EXTRACTION_MAX_CHARS: z.coerce.number().int().min(1000).default(2000000),
-  DOCUMENT_EXTRACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(30000),
-});
+    WORKER_POLL_MS: z.coerce.number().int().min(1000).default(15000),
+    EMAIL_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(5),
+    EMAIL_STALE_LOCK_MINUTES: z.coerce.number().int().min(1).default(15),
+    NOTIFICATION_RETENTION_DAYS: z.coerce.number().int().min(1).default(90),
+    DOCUMENT_EXTRACTION_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(20).default(3),
+    DOCUMENT_EXTRACTION_STALE_MINUTES: z.coerce.number().int().min(1).default(15),
+    DOCUMENT_EXTRACTION_MAX_CHARS: z.coerce.number().int().min(1000).default(2000000),
+    DOCUMENT_EXTRACTION_TIMEOUT_MS: z.coerce.number().int().min(1000).default(30000),
+  })
+  .superRefine((env, ctx) => {
+    if (env.MAIL_DRIVER === 'smtp' && !env.SMTP_HOST) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['SMTP_HOST'],
+        message: 'SMTP_HOST wajib diisi jika MAIL_DRIVER=smtp',
+      });
+    }
+    if (env.MAIL_DRIVER === 'resend' && !env.RESEND_API_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['RESEND_API_KEY'],
+        message: 'RESEND_API_KEY wajib diisi jika MAIL_DRIVER=resend',
+      });
+    }
+  });
 
 const parsed = schema.safeParse(process.env);
 
@@ -76,6 +99,12 @@ export const config = {
   mailDriver: env.MAIL_DRIVER,
   resendApiKey: env.RESEND_API_KEY,
   mailFrom: env.MAIL_FROM,
+  smtpHost: env.SMTP_HOST,
+  smtpPort: env.SMTP_PORT,
+  smtpSecure: env.SMTP_SECURE,
+  smtpUser: env.SMTP_USER,
+  smtpPass: env.SMTP_PASS,
+  smtpFrom: env.SMTP_FROM || env.MAIL_FROM,
 
   googleClientId: env.GOOGLE_CLIENT_ID,
   googleClientSecret: env.GOOGLE_CLIENT_SECRET,

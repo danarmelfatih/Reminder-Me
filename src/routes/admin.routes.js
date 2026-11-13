@@ -74,6 +74,22 @@ function readEmailStatus() {
       detail: 'Driver console: email hanya dicatat ke log',
     };
   }
+  if (config.mailDriver === 'smtp') {
+    if (!config.smtpHost) {
+      return {
+        name: 'email',
+        label: 'Layanan email',
+        status: 'down',
+        detail: 'SMTP_HOST belum diatur',
+      };
+    }
+    return {
+      name: 'email',
+      label: 'Layanan email',
+      status: 'ok',
+      detail: `SMTP · ${config.smtpHost}:${config.smtpPort}`,
+    };
+  }
   if (!config.resendApiKey) {
     return {
       name: 'email',

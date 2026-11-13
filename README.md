@@ -104,9 +104,15 @@ Jika email sudah terdaftar, akun tersebut diubah menjadi admin, diaktifkan, dan 
 | `DEFAULT_TAG_LIMIT`                 | `100`                                 | Maksimal tag per pengguna                                                |
 | `STORAGE_WARN_PERCENT`              | `80`                                  | Ambang peringatan storage                                                |
 | `STORAGE_CRITICAL_PERCENT`          | `95`                                  | Ambang kritis storage                                                    |
-| `MAIL_DRIVER`                       | `console`                             | `console` atau `resend`                                                  |
+| `MAIL_DRIVER`                       | `console`                             | `console`, `resend`, atau `smtp`                                         |
 | `RESEND_API_KEY`                    | kosong                                | Wajib jika `MAIL_DRIVER=resend`                                          |
-| `MAIL_FROM`                         | `Reminder Me <onboarding@resend.dev>` | Pengirim email                                                           |
+| `MAIL_FROM`                         | `Reminder Me <onboarding@resend.dev>` | Pengirim email untuk driver Resend                                       |
+| `SMTP_HOST`                         | kosong                                | Wajib jika `MAIL_DRIVER=smtp`                                            |
+| `SMTP_PORT`                         | `587`                                 | Port SMTP                                                                |
+| `SMTP_SECURE`                       | `false`                               | `true` untuk koneksi TLS langsung, biasanya port 465                     |
+| `SMTP_USER`                         | kosong                                | Username SMTP                                                            |
+| `SMTP_PASS`                         | kosong                                | Password atau app password SMTP                                          |
+| `SMTP_FROM`                         | `MAIL_FROM`                           | Alamat pengirim email untuk driver SMTP                                  |
 | `GOOGLE_CLIENT_ID`                  | kosong                                | OAuth Google                                                             |
 | `GOOGLE_CLIENT_SECRET`              | kosong                                | OAuth Google                                                             |
 | `GOOGLE_REDIRECT_URI`               | `${APP_URL}/api/auth/google/callback` | Redirect OAuth                                                           |
@@ -126,9 +132,9 @@ Jika email sudah terdaftar, akun tersebut diubah menjadi admin, diaktifkan, dan 
 3. Isi `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, dan `APP_URL`.
 4. Pastikan email Google sudah terverifikasi.
 
-## Email (Resend)
+## Email (Resend / SMTP)
 
-Driver `console` hanya mencatat email ke log, cocok untuk development. Untuk pengiriman sungguhan:
+Driver `console` hanya mencatat email ke log, cocok untuk development. Untuk pengiriman sungguhan lewat Resend:
 
 ```env
 MAIL_DRIVER=resend
@@ -137,6 +143,20 @@ MAIL_FROM=Reminder Me <noreply@domain-anda.com>
 ```
 
 Domain pengirim harus terverifikasi di Resend. Worker mengirim email dari `email_outbox` dengan retry dan backoff.
+
+Untuk SMTP biasa (termasuk Gmail app password atau SMTP provider):
+
+```env
+MAIL_DRIVER=smtp
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=alamat@example.com
+SMTP_PASS=app-password
+SMTP_FROM=Reminder Me <alamat@example.com>
+```
+
+Driver SMTP dipakai langsung oleh `sendMail`, termasuk email reset password. Jika autentikasi gagal, detail error dicatat di log server tanpa membocorkan password.
 
 ## Worker
 

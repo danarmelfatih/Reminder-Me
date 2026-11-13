@@ -54,7 +54,7 @@ import {
 export const authRouter = express.Router();
 
 const VERIFY_TTL = 24 * 60 * 60 * 1000;
-const RESET_TTL = 60 * 60 * 1000;
+const RESET_TTL = Number(process.env.PASSWORD_RESET_EXPIRES_MINUTES || 60) * 60 * 1000;
 
 function safeNext(value, fallback = '/app') {
   return safeRedirectPath(value, fallback, config.appUrl);

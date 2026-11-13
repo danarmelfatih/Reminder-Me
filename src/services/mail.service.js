@@ -1,8 +1,10 @@
+import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 import { config } from '../config.js';
 import { logger } from '../lib/logger.js';
 
 let resendClient = null;
+let smtpTransport = null;
 
 function getResend() {
   if (!resendClient) {
@@ -14,10 +16,36 @@ function getResend() {
   return resendClient;
 }
 
+function getSmtpTransport() {
+  if (!smtpTransport) {
+    if (!config.smtpHost) {
+      throw new Error('SMTP_HOST belum diatur');
+    }
+    smtpTransport = nodemailer.createTransport({
+      host: config.smtpHost,
+      port: config.smtpPort,
+      secure: config.smtpSecure,
+      auth: config.smtpUser ? { user: config.smtpUser, pass: config.smtpPass } : undefined,
+    });
+  }
+  return smtpTransport;
+}
+
 export async function sendMail({ to, subject, html, text }) {
   if (config.mailDriver === 'console') {
     logger.info({ to, subject, text }, 'Email (console driver)');
     return { id: 'console', driver: 'console' };
+  }
+
+  if (config.mailDriver === 'smtp') {
+    const info = await getSmtpTransport().sendMail({
+      from: config.smtpFrom,
+      to,
+      subject,
+      html,
+      text,
+    });
+    return { id: info.messageId ?? null, driver: 'smtp' };
   }
 
   const resend = getResend();

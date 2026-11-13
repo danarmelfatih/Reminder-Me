@@ -14,7 +14,12 @@
         <label for="login-password">Password</label>
         <a class="text-link" href="/forgot-password">Lupa password?</a>
       </div>
-      <input id="login-password" type="password" name="password" autocomplete="current-password" placeholder="Masukkan password" required>
+      <div class="password-input">
+        <input id="login-password" type="password" name="password" autocomplete="current-password" placeholder="Masukkan password" required>
+        <button class="password-toggle" type="button" aria-label="Tampilkan password" aria-pressed="false" data-password-toggle>
+          <svg class="icon" aria-hidden="true"><use href="#icon-eye"></use></svg>
+        </button>
+      </div>
     </div>
     <label class="checkbox-row">
       <input type="checkbox" name="remember" value="1">
